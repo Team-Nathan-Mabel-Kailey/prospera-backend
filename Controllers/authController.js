@@ -1,38 +1,54 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { createUser, findUserByUsername } = require("../Models/authModel");
+const {
+    createUser,
+    findUserByUsername,
+    findUserByEmail,
+} = require("../Models/authModel");
 
 // Register User
 const register = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
     try {
-        // Hash the password using bcrypt and salt factor 10
+        // Check if username already exists
+        const existingUser = await findUserByUsername(username);
+        if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
+        }
+
+        // Check if email already exists
+        const existingEmail = await findUserByEmail(email);
+        if (existingEmail) {
+        return res.status(400).json({ error: "Email already exists" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        // Save the user model with the hashed password
-        const user = await createUser(username, hashedPassword);
+        const user = await createUser(username, email, hashedPassword);
         res.status(201).json(user);
     } catch (error) {
-        res.status(400).json({ error: "User register error, maybe the user exists" });
+        res.status(400).json({ error: "User register error" });
     }
 };
 
 // Login User
-// user exists?
-// password correct?
 const login = async (req, res) => {
     const { username, password } = req.body;
-    const user = await findUserByUsername(username);
-    if (user && (await bcrypt.compare(password, user.password))) {
-        // Create a JSON Web Token
+    try {
+        const user = await findUserByUsername(username);
+        if (user && (await bcrypt.compare(password, user.password))) {
+        // Create a JSON web token
         const token = jwt.sign(
-        { userId: user.userID, userName: user.username },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
+            { userId: user.userID, username: user.username },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" } // Token expires in 1 hour
         );
         res.status(200).json({ token });
-    } else {
+        } else {
         res.status(401).json({ error: "Invalid Credentials" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Login error" });
     }
 };
 
