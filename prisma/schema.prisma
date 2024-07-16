@@ -14,21 +14,21 @@ datasource db {
 }
 
 model User {
-  userID              Int                  @id @default(autoincrement())
-  username            String               @unique
-  avatarImage         String               @default("")
-  password            String
-  email               String               @unique
-  firstName           String
-  lastName            String
-  location            String
-  preferredLanguage   String
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  FinancialAccounts   FinancialAccount[]
-  FinancialGoals      FinancialGoal[]
+  userID            Int              @id @default(autoincrement())
+  username          String           @unique
+  email             String           @unique
+  password          String
+  avatarImage       String           @default("")
+  firstName         String?
+  lastName          String?
+  location          String?
+  preferredLanguage String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  FinancialAccounts FinancialAccount[]
+  FinancialGoals    FinancialGoal[]
   ChatbotInteractions ChatbotInteraction[]
-  Conversations       Conversation[]
+  Conversations     Conversation[]
 }
 
 model FinancialAccount {

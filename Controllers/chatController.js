@@ -1,53 +1,93 @@
-//imports the chat model
-const { getChatHistory, saveChatMessage } = require("../Models/chatModel");
-
+const { getChatHistory, saveChatMessage, findOrCreateConversation } = require("../models/chatModel");
 const OpenAI = require("openai");
+const jwt = require("jsonwebtoken");
 
-// OpenAI API key
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-//handles chat functuin to handle chat prompts and responses
-const chatHandler = async (req, res) => {
-    const { prompt, conversationId } = req.body;
+const getChatHistoryById = async (req, res) => {
+    const { conversationId } = req.params;
 
-    if (!prompt) {
-        return res.status(400).json({ error: "Prompt is required" });
-    }
-
-    //connects to openai api
     try {
-        let messages = [
-            { role: "system", content: "You are a helpful financial literacy assistant." }, 
-        ];
-        if (conversationId) {
-            const previousMessages = await getChatHistory(conversationId);
-            previousMessages.forEach((message) => {
-                messages.push({ role: "user", content: message.prompt });
-                messages.push({ role: "assistant", content: message.response });
-            });
-        }
-        messages.push({ role: "user", content: prompt });
-
-        //interaction with openai api
-        const completion = await openai.complete({
-            model: "gpt-3.5-turbo-16k",
-            messages: messages,
-        });
-
-        //processes the response from openai
-        const chatResponse = completion.choices[0].message.content.trim();
-
-        //new conversation id and saves the chat message to the database
-        const newConversationId = conversationId || Date.now().toString();
-        await saveChatMessage(newConversationId, prompt, chatResponse);
-
-        res.json({ response: chatResponse, conversationId: newConversationId });
+        const messages = await getChatHistory(conversationId);
+        res.json({ messages });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Failed to fetch chat history" });
     }
 };
 
-module.exports = { chatHandler };
+const chatHandler = async (req, res) => {
+    const { prompt, conversationId } = req.body;
+    let userId;
+
+    const token = req.header('Authorization')?.split(' ')[1];
+    // if (token) {
+    //     try {
+    //         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    //         userId = decoded.userId;
+    //     } catch (ex) {
+    //         // Token is invalid, respond with an error or handle accordingly
+    //         return res.status(401).json({ error: "Invalid token" });
+    //     }
+    // } else {
+    //     // If there's no token, respond with an error
+    //     return res.status(401).json({ error: "No token provided" });
+    // }
+
+    if (!prompt) {
+        return res.status(400).send("Prompt is empty - it is required");
+    }
+
+    try {
+        let messages = [
+            { role: "system", content: "You are a helpful Financial Literacy assistant." },
+        ];
+
+        if (conversationId) {
+            const previousMessages = await getChatHistory(conversationId);
+            previousMessages.forEach((msg) => {
+                messages.push({ role: "user", content: msg.prompt });
+                messages.push({ role: "assistant", content: msg.response });
+            });
+        }
+
+        messages.push({ role: "user", content: prompt });
+
+        let chatResponse;
+        try {
+            const completion = await openai.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: messages,
+            });
+
+            chatResponse = completion.choices[0].message.content.trim();
+            console.log("Chat response:", chatResponse);
+        } catch (apiError) {
+            console.error(apiError);
+            if (apiError.code === 'insufficient_quota') {
+                chatResponse = "This is a mocked response. Your OpenAI API quota has been exceeded.";
+            } else {
+                throw apiError;
+            }
+        }
+
+        const newConversationId = conversationId || Date.now().toString();
+        await findOrCreateConversation(newConversationId, userId);
+        // await saveChatMessage(newConversationId, prompt, chatResponse, userId);
+
+        res.json({
+            prompt: prompt,
+            response: chatResponse,
+            conversationId: newConversationId,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong");
+    }
+};
+
+module.exports = {
+    chatHandler,
+    getChatHistoryById,
+};

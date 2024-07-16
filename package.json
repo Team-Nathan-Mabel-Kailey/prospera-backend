@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +22,10 @@
     "npm": "^10.8.2"
   },
   "dependencies": {
-    "@prisma/client": "^5.16.2",
-    "openai": "^4.52.7"
+    "@prisma/client": "^5.17.0",
+    "express-rate-limit": "^7.3.1",
+    "morgan": "^1.10.0",
+    "openai": "^4.52.7",
+    "prisma": "^5.17.0"
   }
 }

@@ -2,28 +2,28 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // Function to Register user - (create - prisma)
-const createUser = async (username, password) => {
+const createUser = async (username, email, password) => {
     return await prisma.user.create({
-    data: { username, password },
+        data: { username, email, password },
     });
 };
 
-// Function to Login user - (findUnique - prisma)
-// find the user by id/username
+// Function to find user by username
 const findUserByUsername = async (username) => {
     return await prisma.user.findUnique({
-    where: { username },
+        where: { username },
     });
 };
 
-const findUserById = async (id) => {
+// Function to find user by email
+const findUserByEmail = async (email) => {
     return await prisma.user.findUnique({
-    where: { userID: id },
+        where: { email },
     });
 };
 
 module.exports = {
     createUser,
     findUserByUsername,
-    findUserById,
+    findUserByEmail,
 };
