@@ -3,6 +3,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const userRoutes = require("./Routes/authRoute");
 const chatRoutes = require("./Routes/chatRoute");
+const newsRoutes = require('./Routes/articleRoute');
 
 const app = express();
 const PORT = 3000;
@@ -21,6 +22,9 @@ app.use("/users", userRoutes);
 
 // Chat routes
 app.use("/api/chat", chatRoutes);
+
+//News routes
+app.use('/api', newsRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);

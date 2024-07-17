@@ -1,4 +1,4 @@
-const { getChatHistory, saveChatMessage, findOrCreateConversation } = require("../models/chatModel");
+const { getChatHistory, saveChatMessage, findOrCreateConversation } = require("../Models/chatModel");
 const OpenAI = require("openai");
 const jwt = require("jsonwebtoken");
 
@@ -19,19 +19,17 @@ const getChatHistoryById = async (req, res) => {
 
 const chatHandler = async (req, res) => {
     const { prompt, conversationId } = req.body;
-    let userId;
+    let userId = 1;
 
-    const token = req.header('Authorization')?.split(' ')[1];
+    // const token = req.header('Authorization')?.split(' ')[1];
     // if (token) {
     //     try {
     //         const decoded = jwt.verify(token, process.env.JWT_SECRET);
     //         userId = decoded.userId;
     //     } catch (ex) {
-    //         // Token is invalid, respond with an error or handle accordingly
     //         return res.status(401).json({ error: "Invalid token" });
     //     }
     // } else {
-    //     // If there's no token, respond with an error
     //     return res.status(401).json({ error: "No token provided" });
     // }
 
@@ -72,9 +70,14 @@ const chatHandler = async (req, res) => {
             }
         }
 
-        const newConversationId = conversationId || Date.now().toString();
-        await findOrCreateConversation(newConversationId, userId);
-        // await saveChatMessage(newConversationId, prompt, chatResponse, userId);
+        let newConversationId;
+        if (!conversationId) {
+            const conversation = await findOrCreateConversation(userId);
+            newConversationId = conversation.conversationId;
+        } else {
+            newConversationId = conversationId;
+        }
+        await saveChatMessage(newConversationId, prompt, chatResponse, userId);
 
         res.json({
             prompt: prompt,
