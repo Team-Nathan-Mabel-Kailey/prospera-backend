@@ -14,77 +14,72 @@ datasource db {
 }
 
 model User {
-  userID            Int              @id @default(autoincrement())
-  username          String           @unique
-  email             String           @unique
-  password          String
-  avatarImage       String           @default("")
-  firstName         String?
-  lastName          String?
-  location          String?
-  preferredLanguage String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  FinancialAccounts FinancialAccount[]
-  FinancialGoals    FinancialGoal[]
-  ChatbotInteractions ChatbotInteraction[]
-  Conversations     Conversation[]
+  userID             Int                  @id @default(autoincrement())
+  username           String               @unique
+  email              String               @unique
+  password           String
+  avatarImage        String               @default("")
+  firstName          String?
+  lastName           String?
+  location           String?
+  preferredLanguage  String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  FinancialAccounts  FinancialAccount[]
+  FinancialGoals     FinancialGoal[]
+  Conversations      Conversation[]
+  ChatbotInteraction ChatbotInteraction[]
 }
 
 model FinancialAccount {
-  accountId    Int           @id @default(autoincrement())
-  accountName  String
-  accountType  String
-  balance      Float
-  currency     String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  user         User          @relation(fields: [userId], references: [userID])
-  userId       Int
+  accountId   Int      @id @default(autoincrement())
+  accountName String
+  accountType String
+  balance     Float
+  currency    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [userID])
+  userId      Int
 }
 
 model FinancialGoal {
-  goalId       Int      @id @default(autoincrement())
-  goalName     String
-  targetAmount Float
+  goalId        Int       @id @default(autoincrement())
+  goalName      String
+  targetAmount  Float
   currentAmount Float
-  currency     String
-  startDate    DateTime
-  endDate      DateTime?
-  progress     Float
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [userID])
-  userId       Int
+  currency      String
+  startDate     DateTime
+  endDate       DateTime?
+  progress      Float
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [userID])
+  userId        Int
 }
 
 model ChatbotInteraction {
-  id           Int      @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   conversationId Int
-  prompt       String
-  response     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [userID])
-  userId       Int
-  Conversation Conversation @relation(fields: [conversationId], references: [conversationId])
+  conversation   Conversation @relation(fields: [conversationId], references: [conversationId])
+  prompt         String
+  response       String
+  userId         Int
+  user           User         @relation(fields: [userId], references: [userID])
+  createdAt      DateTime     @default(now())
 }
 
 model Conversation {
-  conversationId Int                   @id @default(autoincrement())
-  userId         Int
-  user           User                  @relation(fields: [userId], references: [userID])
+  conversationId      Int                  @id @default(autoincrement())
+  userId              Int
+  user                User                 @relation(fields: [userId], references: [userID])
   ChatbotInteractions ChatbotInteraction[]
 }
 
 model Article {
-  resourceId    Int      @id @default(autoincrement())
-  title         String
-  content       String
-  type          String
-  language      String
-  tags          String[]
-  datePublished String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
