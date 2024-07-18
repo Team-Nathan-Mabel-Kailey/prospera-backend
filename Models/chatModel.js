@@ -21,13 +21,25 @@ const saveChatMessage = async (conversationId, prompt, response, userId) => {
 
 const findOrCreateConversation = async (userId) => {
     console.log("Creating conversation for user:", userId);
+
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+        where: { userID: userId },
+    });
+
+    if (!user) {
+        throw new Error(`User with ID ${userId} not found`);
+    }
+
+    // Create the conversation if the user exists
     let conversation = await prisma.conversation.create({
         data: {
             user: {
                 connect: { userID: userId },
-            }
+            },
         },
     });
+
     return conversation;
 };
 
