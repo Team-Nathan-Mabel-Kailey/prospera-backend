@@ -29,6 +29,7 @@ model User {
   FinancialGoals     FinancialGoal[]
   Conversations      Conversation[]
   ChatbotInteraction ChatbotInteraction[]
+  securityAnswer     String
 }
 
 model FinancialAccount {
