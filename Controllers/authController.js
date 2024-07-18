@@ -8,7 +8,7 @@ const {
 
 // Register User
 const register = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, securityAnswer } = req.body;
 
     try {
         // Check if username already exists
@@ -24,7 +24,7 @@ const register = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await createUser(username, email, hashedPassword);
+        const user = await createUser(username, email, hashedPassword, securityAnswer);
         res.status(201).json(user);
     } catch (error) {
         res.status(400).json({ error: "User register error" });
