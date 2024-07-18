@@ -19,7 +19,7 @@ const getChatHistoryById = async (req, res) => {
 
 const chatHandler = async (req, res) => {
     const { prompt, conversationId } = req.body;
-    let userId = 1;
+    let userId; 
 
     // const token = req.header('Authorization')?.split(' ')[1];
     // if (token) {

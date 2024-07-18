@@ -58,6 +58,12 @@ const forgotPassword = async (req, res) => {
     const { username, newPassword, securityAnswer } = req.body;
 
     try {
+        console.log("Request body:", req.body);
+
+        if (!username || !newPassword || !securityAnswer) {
+            return res.status(400).json({ error: "Please provide all required fields" });
+        }
+
         const user = await findUserByUsername(username);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -73,7 +79,8 @@ const forgotPassword = async (req, res) => {
 
         res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
-        res.status(500).json({ error: "Password reset error" });
+        console.error("Password reset error:", error);
+        res.status(500).json({ error: "Password reset error", details: error.message });
     }
 };
 
