@@ -4,6 +4,7 @@ const {
     createUser,
     findUserByUsername,
     findUserByEmail,
+    updateUserPasswordByUsername
 } = require("../Models/authModel");
 
 // Register User
@@ -52,4 +53,28 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { register, login };
+// Forgot Password
+const forgotPassword = async (req, res) => {
+    const { username, newPassword, securityAnswer } = req.body;
+
+    try {
+        const user = await findUserByUsername(username);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Check if security answer matches
+        if (user.securityAnswer !== securityAnswer) {
+            return res.status(400).json({ error: "Incorrect security answer" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await updateUserPasswordByUsername(username, hashedPassword);
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Password reset error" });
+    }
+};
+
+module.exports = { register, login, forgotPassword };
