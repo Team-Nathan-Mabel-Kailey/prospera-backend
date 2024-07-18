@@ -81,6 +81,10 @@ model Article {
   id        Int      @id @default(autoincrement())
   title     String
   content   String
+  source    String
+  url       String
+  publishedAt DateTime
   published Boolean  @default(false)
+  type      String
   createdAt DateTime @default(now())
 }
