@@ -22,8 +22,17 @@ const findUserByEmail = async (email) => {
     });
 };
 
+// Function to update the user's password by username
+const updateUserPasswordByUsername = async (username, newPassword) => {
+    return await prisma.user.update({
+        where: { username },
+        data: { password: newPassword },
+    });
+};
+
 module.exports = {
     createUser,
     findUserByUsername,
     findUserByEmail,
+    updateUserPasswordByUsername
 };
