@@ -1,4 +1,4 @@
-const { getChatHistory, saveChatMessage, findOrCreateConversation } = require("../Models/chatModel");
+const { getChatHistory, saveChatMessage, findOrCreateConversation, getConversations } = require("../Models/chatModel");
 const OpenAI = require("openai");
 const jwt = require("jsonwebtoken");
 
@@ -19,7 +19,7 @@ const getChatHistoryById = async (req, res) => {
 
 const chatHandler = async (req, res) => {
     const { prompt, conversationId } = req.body;
-    let userId; 
+    let userId = 2; 
 
     // const token = req.header('Authorization')?.split(' ')[1];
     // if (token) {
@@ -90,7 +90,20 @@ const chatHandler = async (req, res) => {
     }
 };
 
+
+const getConversationsByUserId = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const conversations = await getConversations(userId);
+        res.json({ conversations });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+};
+
 module.exports = {
     chatHandler,
     getChatHistoryById,
+    getConversationsByUserId,
 };

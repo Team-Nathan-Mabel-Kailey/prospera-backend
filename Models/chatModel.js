@@ -43,8 +43,16 @@ const findOrCreateConversation = async (userId) => {
     return conversation;
 };
 
+const getConversations = async (userId) => {
+    return await prisma.conversation.findMany({
+        where: { userId: parseInt(userId) },
+        orderBy: { createdAt: "asc" },
+    });
+};
+
 module.exports = {
     getChatHistory,
     saveChatMessage,
     findOrCreateConversation,
+    getConversations,
 };
