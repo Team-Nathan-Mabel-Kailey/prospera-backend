@@ -1,5 +1,5 @@
 const express = require("express");
-const { chatHandler,getChatHistoryById, getConversationsByUserId } = require("../Controllers/chatController");
+const { chatHandler,getChatHistoryById, getConversationsByUserId, startNewConversation } = require("../Controllers/chatController");
 const router = express.Router();
 
 // Route to handle chat messages
@@ -9,5 +9,7 @@ router.post("/", chatHandler);
 router.get("/:conversationId", getChatHistoryById);
 
 router.get("/conversations/:userId", getConversationsByUserId);
+
+router.post("/new", startNewConversation);
 
 module.exports = router;
