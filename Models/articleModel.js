@@ -10,3 +10,4 @@ const createArticle = async (title, content, source, url, publishedAt, type) => 
 module.exports = {
     createArticle,
 };
+

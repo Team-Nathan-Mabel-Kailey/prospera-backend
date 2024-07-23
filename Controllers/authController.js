@@ -17,17 +17,18 @@ const register = async (req, res) => {
         // Check if username already exists
         const existingUser = await findUserByUsername(username);
         if (existingUser) {
-        return res.status(400).json({ error: "Username already exists" });
+            return res.status(400).json({ error: "Username already exists" });
         }
 
         // Check if email already exists
         const existingEmail = await findUserByEmail(email);
         if (existingEmail) {
-        return res.status(400).json({ error: "Email already exists" });
+            return res.status(400).json({ error: "Email already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await createUser(username, email, hashedPassword, securityAnswer);
+        const hashedSecurityAnswer = await bcrypt.hash(securityAnswer, 10);
+        const user = await createUser(username, email, hashedPassword, hashedSecurityAnswer);
         res.status(201).json(user);
     } catch (error) {
         res.status(400).json({ error: "User register error" });
@@ -75,7 +76,7 @@ const forgotPassword = async (req, res) => {
         }
 
         // Check if security answer matches
-        if (user.securityAnswer !== securityAnswer) {
+        if (!(await bcrypt.compare(securityAnswer, user.securityAnswer))) {
             return res.status(400).json({ error: "Incorrect security answer" });
         }
 
@@ -122,6 +123,5 @@ const getTopics = async (req, res) => {
         res.status(500).json({ error: "Failed to retrieve topics" });
     }
 };
-
 
 module.exports = { register, login, forgotPassword, saveTopics, getTopics };
