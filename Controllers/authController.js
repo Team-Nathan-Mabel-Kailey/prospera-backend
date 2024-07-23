@@ -4,6 +4,9 @@ const {
     createUser,
     findUserByUsername,
     findUserByEmail,
+    updateUserPasswordByUsername,
+    updateUserTopics,
+    getUserById
 } = require("../Models/authModel");
 
 // Register User
@@ -38,15 +41,18 @@ const login = async (req, res) => {
     try {
         const user = await findUserByUsername(username);
         if (user && (await bcrypt.compare(password, user.password))) {
-        // Create a JSON web token
-        const token = jwt.sign(
-            { userId: user.userID, username: user.username },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" } // Token expires in 1 hour
-        );
-        res.status(200).json({ token });
+            const token = jwt.sign(
+                { userId: user.userID, username: user.username },
+                process.env.JWT_SECRET,
+                { expiresIn: "1h" }
+            );
+            res.status(200).json({ 
+                token, 
+                userId: user.userID, 
+                hasCompletedTopics: user.hasCompletedTopics 
+            });
         } else {
-        res.status(401).json({ error: "Invalid Credentials" });
+            res.status(401).json({ error: "Invalid Credentials" });
         }
     } catch (error) {
         res.status(500).json({ error: "Login error" });

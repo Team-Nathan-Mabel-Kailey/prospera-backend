@@ -13,6 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   userID             Int                  @id @default(autoincrement())
   username           String               @unique
@@ -25,62 +26,48 @@ model User {
   preferredLanguage  String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
-  FinancialAccounts  FinancialAccount[]
-  FinancialGoals     FinancialGoal[]
   Conversations      Conversation[]
-  ChatbotInteraction ChatbotInteraction[]
+  ChatbotInteractions ChatbotInteraction[]
+  Widgets            Widget[]
   securityAnswer     String
-}
-
-model FinancialAccount {
-  accountId   Int      @id @default(autoincrement())
-  accountName String
-  accountType String
-  balance     Float
-  currency    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [userID])
-  userId      Int
-}
-
-model FinancialGoal {
-  goalId        Int       @id @default(autoincrement())
-  goalName      String
-  targetAmount  Float
-  currentAmount Float
-  currency      String
-  startDate     DateTime
-  endDate       DateTime?
-  progress      Float
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  user          User      @relation(fields: [userId], references: [userID])
-  userId        Int
+  topics             String[]             @default([])
+  hasCompletedTopics Boolean              @default(false)
 }
 
 model ChatbotInteraction {
   id             Int          @id @default(autoincrement())
   conversationId Int
-  conversation   Conversation @relation(fields: [conversationId], references: [conversationId])
+  conversation   Conversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
   prompt         String
   response       String
   userId         Int
-  user           User         @relation(fields: [userId], references: [userID])
+  user           User         @relation(fields: [userId], references: [userID], onDelete: Cascade)
   createdAt      DateTime     @default(now())
 }
 
 model Conversation {
   conversationId      Int                  @id @default(autoincrement())
   userId              Int
-  user                User                 @relation(fields: [userId], references: [userID])
+  user                User                 @relation(fields: [userId], references: [userID], onDelete: Cascade)
   ChatbotInteractions ChatbotInteraction[]
+  createdAt           DateTime             @default(now())
 }
 
-model Article {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  published Boolean  @default(false)
-  createdAt DateTime @default(now())
+model Widget {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [userID], onDelete: Cascade)
+  type         WidgetType
+  configuration Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum WidgetType {
+  STOCK
+  FINANCIAL_GOALS
+  HIGHLIGHTED_SAVINGS
+  NEWS
+  SAVINGS_ACCOUNT
+  CHECKINGS_ACCOUNT
 }

@@ -32,14 +32,14 @@ const updateUserPasswordByUsername = async (username, newPassword) => {
 
 const updateUserTopics = async (userId, topics) => {
     return await prisma.user.update({
-        where: { id: userId },
-        data: { topics, hasCompletedTopics: true },
+        where: { userID: parseInt(userId) },  // Ensure userID is an integer
+        data: { topics: { set: topics }, hasCompletedTopics: true },
     });
 };
 
 const getUserById = async (userId) => {
     return await prisma.user.findUnique({
-        where: { id: userId },
+        where: { userID: parseInt(userId) },  // Use userID instead of id
     });
 };
 
@@ -49,5 +49,5 @@ module.exports = {
     findUserByEmail,
     updateUserPasswordByUsername,
     updateUserTopics,
-    get
+    getUserById,
 };
