@@ -1,14 +1,11 @@
-const { PrismaClient } = require('@prisma/client');
+const { getWidgetsByUserId, createWidget, updateWidgetLayout, updateWidgetContent, deleteWidget } = require('../Models/widgetModel');
 const axios = require('axios');
-const prisma = new PrismaClient();
 
-const getWidgetsByUserId = async (req, res) => {
+const getWidgetsByUserIdHandler = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const widgets = await prisma.widget.findMany({
-            where: { userId: parseInt(userId) }
-        });
+        const widgets = await getWidgetsByUserId(userId);
         res.status(200).json(widgets);
     } catch (error) {
         console.error(error);  // Log the error for debugging
@@ -16,26 +13,11 @@ const getWidgetsByUserId = async (req, res) => {
     }
 };
 
-const createWidget = async (req, res) => {
-    const { userId, type, configuration } = req.body;
+const createWidgetHandler = async (req, res) => {
+    const { userId, type, configuration, w, h, x, y, i } = req.body;
 
     try {
-        // Check if the user exists
-        const user = await prisma.user.findUnique({
-            where: { userID: parseInt(userId) }
-        });
-
-        if (!user) {
-            return res.status(400).json({ error: 'User does not exist' });
-        }
-
-        const newWidget = await prisma.widget.create({
-            data: {
-                userId: parseInt(userId),
-                type,
-                configuration
-            }
-        });
+        const newWidget = await createWidget(userId, type, configuration, w, h, x, y, i);
         res.status(201).json(newWidget);
     } catch (error) {
         console.error(error);  // Log the error for debugging
@@ -43,13 +25,37 @@ const createWidget = async (req, res) => {
     }
 };
 
-const deleteWidget = async (req, res) => {
+const updateWidgetLayoutHandler = async (req, res) => {
+    const { id } = req.params;
+    const { w, h, x, y, i } = req.body;
+
+    try {
+        const updatedWidget = await updateWidgetLayout(id, w, h, x, y, i);
+        res.status(200).json(updatedWidget);
+    } catch (error) {
+        console.error(error);  // Log the error for debugging
+        res.status 500).json({ error: 'Error updating widget layout' });
+    }
+};
+
+const updateWidgetContentHandler = async (req, res) => {
+    const { id } = req.params;
+    const { configuration } = req.body;
+
+    try {
+        const updatedWidget = await updateWidgetContent(id, configuration);
+        res.status(200).json(updatedWidget);
+    } catch (error) {
+        console.error(error);  // Log the error for debugging
+        res.status 500).json({ error: 'Error updating widget content' });
+    }
+};
+
+const deleteWidgetHandler = async (req, res) => {
     const { id } = req.params;
 
     try {
-        await prisma.widget.delete({
-            where: { id: parseInt(id) }
-        });
+        await deleteWidget(id);
         res.status(200).json({ message: 'Widget deleted successfully' });
     } catch (error) {
         console.error(error);  // Log the error for debugging
@@ -57,8 +63,12 @@ const deleteWidget = async (req, res) => {
     }
 };
 
-const getStockData = async (req, res) => {
+const getStockDataHandler = async (req, res) => {
     const { symbol, period } = req.query;
+
+    if (!symbol || !period) {
+        return res.status(400).json({ error: 'Missing required query parameters: symbol, period' });
+    }
 
     const options = {
         method: 'GET',
@@ -80,8 +90,10 @@ const getStockData = async (req, res) => {
 };
 
 module.exports = {
-    getWidgetsByUserId,
-    createWidget,
-    deleteWidget,
-    getStockData
+    getWidgetsByUserId: getWidgetsByUserIdHandler,
+    createWidget: createWidgetHandler,
+    updateWidgetLayout: updateWidgetLayoutHandler,
+    updateWidgetContent: updateWidgetContentHandler,
+    deleteWidget: deleteWidgetHandler,
+    getStockData: getStockDataHandler
 };

@@ -59,6 +59,11 @@ model Widget {
   user         User     @relation(fields: [userId], references: [userID], onDelete: Cascade)
   type         WidgetType
   configuration Json
+  w            Int
+  h            Int
+  x            Int
+  y            Int
+  i            String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
