@@ -9,11 +9,40 @@ const getWidgetsByUserId = async (userId) => {
 };
 
 // Function to create a new widget
-const createWidget = async (userId, type, configuration) => {
+const createWidget = async (userId, type, configuration, w, h, x, y, i) => {
     return await prisma.widget.create({
         data: {
             userId: parseInt(userId),
             type,
+            configuration,
+            w,
+            h,
+            x,
+            y,
+            i
+        }
+    });
+};
+
+// Function to update a widget's layout by ID
+const updateWidgetLayout = async (id, w, h, x, y, i) => {
+    return await prisma.widget.update({
+        where: { id: parseInt(id) },
+        data: {
+            w,
+            h,
+            x,
+            y,
+            i
+        }
+    });
+};
+
+// Function to update a widget's content by ID
+const updateWidgetContent = async (id, configuration) => {
+    return await prisma.widget.update({
+        where: { id: parseInt(id) },
+        data: {
             configuration
         }
     });
@@ -29,5 +58,7 @@ const deleteWidget = async (id) => {
 module.exports = {
     getWidgetsByUserId,
     createWidget,
+    updateWidgetLayout,
+    updateWidgetContent,
     deleteWidget
 };
