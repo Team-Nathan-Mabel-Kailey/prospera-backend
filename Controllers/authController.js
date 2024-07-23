@@ -4,7 +4,9 @@ const {
     createUser,
     findUserByUsername,
     findUserByEmail,
-    updateUserPasswordByUsername
+    updateUserPasswordByUsername,
+    updateUserTopics,
+    getUserById
 } = require("../Models/authModel");
 
 // Register User
@@ -38,15 +40,18 @@ const login = async (req, res) => {
     try {
         const user = await findUserByUsername(username);
         if (user && (await bcrypt.compare(password, user.password))) {
-        // Create a JSON web token
-        const token = jwt.sign(
-            { userId: user.userID, username: user.username },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" } // Token expires in 1 hour
-        );
-        res.status(200).json({ token });
+            const token = jwt.sign(
+                { userId: user.userID, username: user.username },
+                process.env.JWT_SECRET,
+                { expiresIn: "1h" }
+            );
+            res.status(200).json({ 
+                token, 
+                userId: user.userID, 
+                hasCompletedTopics: user.hasCompletedTopics 
+            });
         } else {
-        res.status(401).json({ error: "Invalid Credentials" });
+            res.status(401).json({ error: "Invalid Credentials" });
         }
     } catch (error) {
         res.status(500).json({ error: "Login error" });
@@ -84,4 +89,39 @@ const forgotPassword = async (req, res) => {
     }
 };
 
-module.exports = { register, login, forgotPassword };
+// Save user topics
+const saveTopics = async (req, res) => {
+    const { userId, topics } = req.body;
+
+    console.log("Received request to save topics:", { userId, topics });
+
+    try {
+        const user = await updateUserTopics(userId, topics);
+        console.log("User topics updated successfully:", user);
+        res.status(200).json({ message: "Topics saved successfully", user });
+    } catch (error) {
+        console.error("Failed to save topics:", error);
+        res.status(500).json({ error: "Failed to save topics", details: error.message });
+    }
+};
+
+const getTopics = async (req, res) => {
+    const { userId } = req.params;
+
+    console.log("Received request to get topics for user:", userId);
+
+    try {
+        const user = await getUserById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        console.log("User found:", user);
+        res.status(200).json({ topics: user.topics, hasCompletedTopics: user.hasCompletedTopics });
+    } catch (error) {
+        console.error("Failed to retrieve topics:", error);
+        res.status(500).json({ error: "Failed to retrieve topics" });
+    }
+};
+
+
+module.exports = { register, login, forgotPassword, saveTopics, getTopics };
