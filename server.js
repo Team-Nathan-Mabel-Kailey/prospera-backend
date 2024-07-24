@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const userRoutes = require("./Routes/authRoute");
 const chatRoutes = require("./Routes/chatRoute");
 const widgetRoutes = require('./Routes/widgetRoute');
+const settingsRoutes = require('./Routes/settingsRoute');
 
 const app = express();
 const PORT = 3000;
@@ -25,6 +26,9 @@ app.use("/api/chat", chatRoutes);
 
 // Widget routes
 app.use('/api/widgets', widgetRoutes);
+
+// Settings routes
+app.use('/api/settings', settingsRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);

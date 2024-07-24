@@ -34,7 +34,7 @@ const updateWidgetLayoutHandler = async (req, res) => {
         res.status(200).json(updatedWidget);
     } catch (error) {
         console.error(error);  // Log the error for debugging
-        res.status 500).json({ error: 'Error updating widget layout' });
+        res.status(500).json({ error: 'Error updating widget layout' });
     }
 };
 
@@ -47,7 +47,7 @@ const updateWidgetContentHandler = async (req, res) => {
         res.status(200).json(updatedWidget);
     } catch (error) {
         console.error(error);  // Log the error for debugging
-        res.status 500).json({ error: 'Error updating widget content' });
+        res.status(500).json({ error: 'Error updating widget content' });
     }
 };
 
