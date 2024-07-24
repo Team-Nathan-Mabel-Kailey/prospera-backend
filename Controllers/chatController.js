@@ -1,6 +1,5 @@
-const { getChatHistory, saveChatMessage, findOrCreateConversation } = require("../Models/chatModel");
+const { getChatHistory, saveChatMessage, findOrCreateConversation, getConversations, createNewConversation } = require("../Models/chatModel");
 const OpenAI = require("openai");
-const jwt = require("jsonwebtoken");
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -13,25 +12,14 @@ const getChatHistoryById = async (req, res) => {
         const messages = await getChatHistory(conversationId);
         res.json({ messages });
     } catch (error) {
+        console.error('Error fetching chat history:', error);
         res.status(500).json({ error: "Failed to fetch chat history" });
     }
 };
 
 const chatHandler = async (req, res) => {
     const { prompt, conversationId } = req.body;
-    let userId = 1;
-
-    // const token = req.header('Authorization')?.split(' ')[1];
-    // if (token) {
-    //     try {
-    //         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    //         userId = decoded.userId;
-    //     } catch (ex) {
-    //         return res.status(401).json({ error: "Invalid token" });
-    //     }
-    // } else {
-    //     return res.status(401).json({ error: "No token provided" });
-    // }
+    let userId = 2; // Replace this with your logic for getting the user ID
 
     if (!prompt) {
         return res.status(400).send("Prompt is empty - it is required");
@@ -77,7 +65,10 @@ const chatHandler = async (req, res) => {
         } else {
             newConversationId = conversationId;
         }
+        
+        // Save the chat message (both prompt and response)
         await saveChatMessage(newConversationId, prompt, chatResponse, userId);
+        console.log(`Saved chat message to conversation ${newConversationId}: User: ${prompt}, Assistant: ${chatResponse}`);
 
         res.json({
             prompt: prompt,
@@ -90,7 +81,33 @@ const chatHandler = async (req, res) => {
     }
 };
 
+const getConversationsByUserId = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const conversations = await getConversations(userId);
+        res.json({ conversations });
+    } catch (error) {
+        console.error('Error fetching conversations:', error);
+        res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+};
+
+const startNewConversation = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const conversation = await createNewConversation(userId);
+        res.json({ conversationId: conversation.conversationId });
+    } catch (error) {
+        console.error('Error starting new conversation:', error);
+        res.status(500).json({ error: "Failed to start new conversation" });
+    }
+};
+
 module.exports = {
     chatHandler,
     getChatHistoryById,
+    getConversationsByUserId,
+    startNewConversation,
 };
