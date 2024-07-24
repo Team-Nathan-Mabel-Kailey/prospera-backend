@@ -1,4 +1,4 @@
-const { getWidgetsByUserId, createWidget, updateWidgetLayout, updateWidgetContent, deleteWidget } = require('../Models/widgetModel');
+const { getWidgetsByUserId, updateWidgetContent, deleteWidget } = require('../Models/widgetModel');
 const axios = require('axios');
 
 const getWidgetsByUserIdHandler = async (req, res) => {
@@ -14,26 +14,39 @@ const getWidgetsByUserIdHandler = async (req, res) => {
 };
 
 const createWidgetHandler = async (req, res) => {
-    const { userId, type, configuration, w, h, x, y, i } = req.body;
-
+    const { userId, type, x, y, w, h, configuration, i } = req.body;
     try {
-        const newWidget = await createWidget(userId, type, configuration, w, h, x, y, i);
-        res.status(201).json(newWidget);
+    const newWidget = await prisma.widget.create({
+        data: {
+        i,
+        type,
+        x,
+        y,
+        w,
+        h,
+        configuration,
+        user: {
+            connect: { userID: parseInt(userId) },
+        },
+        },
+    });
+    res.status(201).json(newWidget);
     } catch (error) {
-        console.error(error);  // Log the error for debugging
-        res.status(500).json({ error: 'Error creating widget' });
+    console.error('Error adding widget:', error);
+    res.status(500).json({ error: 'Error adding widget' });
     }
 };
 
 const updateWidgetLayoutHandler = async (req, res) => {
-    const { id } = req.params;
-    const { w, h, x, y, i } = req.body;
-
+    const { id, x, y, w, h } = req.body;
     try {
-        const updatedWidget = await updateWidgetLayout(id, w, h, x, y, i);
+        const updatedWidget = await prisma.widget.update({
+        where: { id: parseInt(id) },
+        data: { x, y, w, h },
+        });
         res.status(200).json(updatedWidget);
     } catch (error) {
-        console.error(error);  // Log the error for debugging
+        console.error('Error updating widget layout:', error);
         res.status(500).json({ error: 'Error updating widget layout' });
     }
 };
