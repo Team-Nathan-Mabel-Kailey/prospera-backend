@@ -8,6 +8,6 @@ router.post("/login", login);
 router.post("/forgot-password", forgotPassword);
 router.post("/save-topics", saveTopics);
 router.get("/get-topics/:userId", getTopics);
-router.get("/user/:userId", getUser);
+router.get("/:userId", getUser);
 
 module.exports = router;
