@@ -40,6 +40,11 @@ const updateUserTopics = async (userId, topics) => {
 const getUserById = async (userId) => {
     return await prisma.user.findUnique({
       where: { userID: parseInt(userId) },  // Use userID instead of id
+        include: {
+            Conversations: true,
+            ChatbotInteractions: true,
+            Widgets: true,
+        }
     });
 };
 
