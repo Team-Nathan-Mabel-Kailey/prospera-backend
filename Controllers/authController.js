@@ -127,16 +127,14 @@ const getTopics = async (req, res) => {
 const getUser = async (req, res) => {
     const { userId } = req.params;
     try {
-        const user = await getUserById(userId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        res.status(200).json(user);
-        } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve user' });
-        }
+    const user = await getUserById(userId);
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json(user);
+    } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve user' });
+    }
 };
-
-
 
 module.exports = { register, login, forgotPassword, saveTopics, getTopics, getUser };
