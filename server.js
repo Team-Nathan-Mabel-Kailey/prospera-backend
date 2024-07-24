@@ -1,3 +1,4 @@
+const dotenv = require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -26,6 +27,9 @@ app.use("/api/chat", chatRoutes);
 //News routes
 app.use('/api', newsRoutes);
 
+
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);
 });
+
+
