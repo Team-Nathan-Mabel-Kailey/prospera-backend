@@ -6,7 +6,8 @@ const {
     findUserByEmail,
     updateUserPasswordByUsername,
     updateUserTopics,
-    getUserById
+    getUserById,
+    updateUserProfileById,
 } = require("../Models/authModel");
 
 // Register User
@@ -137,4 +138,16 @@ const getUser = async (req, res) => {
     }
 };
 
-module.exports = { register, login, forgotPassword, saveTopics, getTopics, getUser };
+const updateUserProfile = async (req, res) => {
+    const { userId } = req.params;
+    const { firstName, lastName, username } = req.body;
+
+    try {
+        const updatedUser = await updateUserProfileById(userId, { firstName, lastName, username });
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to update profile", details: error.message });
+    }
+};
+
+module.exports = { register, login, forgotPassword, saveTopics, getTopics, getUser, updateUserProfile };

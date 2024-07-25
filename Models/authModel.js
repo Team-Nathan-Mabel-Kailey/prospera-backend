@@ -48,6 +48,13 @@ const getUserById = async (userId) => {
     });
 };
 
+const updateUserProfileById = async (userId, data) => {
+    return await prisma.user.update({
+        where: { userID: parseInt(userId) },
+        data,
+    });
+};
+
 module.exports = {
     createUser,
     findUserByUsername,
@@ -55,4 +62,5 @@ module.exports = {
     updateUserPasswordByUsername,
     updateUserTopics,
     getUserById,
+    updateUserProfileById,
 };
