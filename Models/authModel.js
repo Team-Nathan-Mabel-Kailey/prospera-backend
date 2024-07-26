@@ -37,10 +37,15 @@ const updateUserPasswordByUsername = async (username, newPassword) => {
 };
 
 const updateUserTopics = async (userId, topics) => {
-    return await prisma.user.update({
-        where: { userID: parseInt(userId) },  // Ensure userID is an integer
-        data: { topics: { set: topics }, hasCompletedTopics: true },
-    });
+    try {
+        return await prisma.user.update({
+            where: { userID: parseInt(userId) },  // Ensure userID is an integer
+            data: { topics: { set: topics }, hasCompletedTopics: true },
+        });
+    } catch (error) {
+        console.error("Database update error:", error);
+        throw new Error("Database update failed");
+    }
 };
 
 const getUserById = async (userId) => {

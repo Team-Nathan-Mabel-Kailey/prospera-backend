@@ -113,9 +113,18 @@ const forgotPassword = async (req, res) => {
 const saveTopics = async (req, res) => {
     const { userId, topics } = req.body;
 
+    if (!userId || !Array.isArray(topics)) {
+        return res.status(400).json({ error: "Invalid input" });
+    }
+
     console.log("Received request to save topics:", { userId, topics });
 
     try {
+        const userExists = await getUserById(userId);
+        if (!userExists) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
         const user = await updateUserTopics(userId, topics);
         console.log("User topics updated successfully:", user);
         res.status(200).json({ message: "Topics saved successfully", user });
