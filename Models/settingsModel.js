@@ -20,7 +20,9 @@ const updateUserName = async (userId, firstName, lastName) => {
 // Function to update user email
 const updateUserEmail = async (userId, email, securityAnswer) => {
     const user = await getUserById(userId);
-    if (user.securityAnswer !== securityAnswer) {
+    console.log("User is: ", user)
+    console.log("securityAnswer", securityAnswer)
+    if (!await bcrypt.compare(securityAnswer, user.securityAnswer)) {
         throw new Error('Incorrect security answer');
     }
 
