@@ -1,4 +1,5 @@
 // const { getWidgetsByUserId, createWidget, updateWidgetLayout, updateWidgetContent, deleteWidget } = require('../Models/widgetModel');
+// const { getWidgetsByUserId, updateWidgetContent, deleteWidget } = require('../Models/widgetModel');
 // const axios = require('axios');
 
 // const getWidgetsByUserIdHandler = async (req, res) => {
@@ -22,6 +23,26 @@
 //     } catch (error) {
 //         console.error(error);  // Log the error for debugging
 //         res.status(500).json({ error: 'Error creating widget' });
+//     const { userId, type, x, y, w, h, configuration, i } = req.body;
+//     try {
+//     const newWidget = await prisma.widget.create({
+//         data: {
+//         i,
+//         type,
+//         x,
+//         y,
+//         w,
+//         h,
+//         configuration,
+//         user: {
+//             connect: { userID: parseInt(userId) },
+//         },
+//         },
+//     });
+//     res.status(201).json(newWidget);
+//     } catch (error) {
+//     console.error('Error adding widget:', error);
+//     res.status(500).json({ error: 'Error adding widget' });
 //     }
 // };
 
@@ -34,6 +55,15 @@
 //         res.status(200).json(updatedWidget);
 //     } catch (error) {
 //         console.error(error);  // Log the error for debugging
+//     const { id, x, y, w, h } = req.body;
+//     try {
+//         const updatedWidget = await prisma.widget.update({
+//         where: { id: parseInt(id) },
+//         data: { x, y, w, h },
+//         });
+//         res.status(200).json(updatedWidget);
+//     } catch (error) {
+//         console.error('Error updating widget layout:', error);
 //         res.status(500).json({ error: 'Error updating widget layout' });
 //     }
 // };

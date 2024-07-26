@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const novu = require('../novu');
 const {
     createUser,
     findUserByUsername,
@@ -15,24 +16,42 @@ const register = async (req, res) => {
     const { username, email, password, securityAnswer } = req.body;
 
     try {
-        // Check if username already exists
+        console.log("Register request body:", req.body);
+
         const existingUser = await findUserByUsername(username);
         if (existingUser) {
+            console.log("Username already exists:", username);
             return res.status(400).json({ error: "Username already exists" });
         }
 
-        // Check if email already exists
         const existingEmail = await findUserByEmail(email);
         if (existingEmail) {
+            console.log("Email already exists:", email);
             return res.status(400).json({ error: "Email already exists" });
+        }
+
+        if (!username || !email || !password || !securityAnswer) {
+            console.log("Missing required fields:", req.body);
+            return res.status(400).json({ error: "Missing required fields" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const hashedSecurityAnswer = await bcrypt.hash(securityAnswer, 10);
         const user = await createUser(username, email, hashedPassword, hashedSecurityAnswer);
+
+        // Create a Novu subscriber for the new user
+        await novu.subscribers.identify(user.userID.toString(), {
+            email: user.email,
+            firstName: user.username, // Adjusted as `firstName` is not in the user model
+            avatar: null, // Assuming avatar is not part of the user model
+        });
+
+        console.log("User created:", user);
+
         res.status(201).json(user);
     } catch (error) {
-        res.status(400).json({ error: "User register error" });
+        console.error("User register error:", error);
+        res.status(500).json({ error: "User register error" });
     }
 };
 

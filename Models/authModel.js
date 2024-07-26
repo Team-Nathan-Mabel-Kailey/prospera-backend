@@ -1,5 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: process.env.DATABASE_URL, // This should be set to your PostgreSQL connection string
+        },
+    },
+});
 
 // Function to Register user - (create - prisma)
 const createUser = async (username, email, password, securityAnswer) => {
@@ -48,10 +54,14 @@ const getUserById = async (userId) => {
     });
 };
 
-const updateUserProfileById = async (userId, data) => {
-    return await prisma.user.update({
-        where: { userID: parseInt(userId) },
-        data,
+const getAllUsers = async () => {
+    return await prisma.user.findMany({
+    select: {
+        userID: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+    },
     });
 };
 
@@ -62,5 +72,5 @@ module.exports = {
     updateUserPasswordByUsername,
     updateUserTopics,
     getUserById,
-    updateUserProfileById,
+    getAllUsers
 };

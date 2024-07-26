@@ -1,5 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: process.env.DATABASE_URL, // This should be set to your PostgreSQL connection string
+        },
+    },
+});
 
 const getChatHistory = async (conversationId) => {
     return await prisma.chatbotInteraction.findMany({
@@ -44,9 +50,10 @@ const findOrCreateConversation = async (userId) => {
     return conversation;
 };
 
+
 const getConversations = async (userId) => {
     return await prisma.conversation.findMany({
-        where: { userId: parseInt(userId) },
+        where: { userId: parseInt(userId) }, // Ensure userId is being used correctly here
         orderBy: { createdAt: "asc" },
     });
 };

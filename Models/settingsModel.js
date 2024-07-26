@@ -1,5 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: process.env.DATABASE_URL, // This should be set to your PostgreSQL connection string
+        },
+    },
+});
 const bcrypt = require('bcryptjs');
 
 // Function to get user by ID

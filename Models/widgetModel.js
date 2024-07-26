@@ -1,5 +1,12 @@
 // const { PrismaClient } = require('@prisma/client');
 // const prisma = new PrismaClient();
+// const prisma = new PrismaClient({
+//     datasources: {
+//         db: {
+//             url: process.env.DATABASE_URL, // This should be set to your PostgreSQL connection string
+//         },
+//     },
+// });
 
 // // Function to get widgets by user ID
 // const getWidgetsByUserId = async (userId) => {
@@ -63,6 +70,8 @@
 //     deleteWidget
 // };
 
+//widget model
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 // Function to get widgets by user ID
@@ -101,6 +110,7 @@ const getWidgetsByUserId = async (userId) => {
 //         }
 //     });
 // };
+
 // Function to update a widget's content by ID
 const updateWidgetContent = async (id, configuration) => {
     return await prisma.widget.update({
