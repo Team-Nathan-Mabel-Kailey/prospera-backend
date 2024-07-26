@@ -1,3 +1,4 @@
+
 require('ts-node').register();
 const express = require('express');
 const cors = require('cors');
@@ -71,6 +72,9 @@ app.get('/api/getSubscriber', async (req, res) => {
     }
 });
 
+
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);
 });
+
+
