@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get('/user/:userId', getWidgetsByUserId);
 router.post('/create', addWidget);
-router.put('/layout/:id', updateWidgetLayout);
+router.put('/layout', updateWidgetLayout);
 router.put('/content/:id', updateWidgetContent);
 router.delete('/:id', deleteWidget);
 router.get('/stock', getStockData);
