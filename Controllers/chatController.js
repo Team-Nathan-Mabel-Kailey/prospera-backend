@@ -199,6 +199,7 @@ const chatHandler = async (req, res) => {
 
 const getConversationsByUserId = async (req, res) => {
     const { userId } = req.params;
+    console.log("userId in controller for getConversationsByUserId:", userId);
 
     try {
         const conversations = await getConversations(userId);
