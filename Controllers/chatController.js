@@ -134,7 +134,7 @@ const getChatHistoryById = async (req, res) => {
 
 const chatHandler = async (req, res) => {
     const { prompt, conversationId } = req.body;
-    const userId = req.user ? req.user.id : 2; // Replace this with your logic for getting the user ID
+    const userId = req.user; // Replace this with your logic for getting the user ID
 
     if (!prompt) {
         return res.status(400).send("Prompt is empty - it is required");
