@@ -6,7 +6,7 @@ const router = express.Router();
 router.post("/", chatHandler);
 
 // Route to fetch chat history for a conversation
-router.get("/:conversationId", getChatHistoryById);
+router.get("/:userId/:conversationId", getChatHistoryById);
 
 router.get("/conversations/:userId", getConversationsByUserId);
 
