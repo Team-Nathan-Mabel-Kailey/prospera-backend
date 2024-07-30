@@ -8,6 +8,7 @@ const prisma = new PrismaClient({
 });
 
 const getChatHistory = async (userId, conversationId) => {
+    console.log(`Getting chat history for userId: ${userId}, conversationId: ${conversationId}`);
     return await prisma.chatbotInteraction.findMany({
         where: { 
             userId: parseInt(userId),
@@ -55,26 +56,27 @@ const findOrCreateConversation = async (userId) => {
     const highestConversation = await prisma.conversation.findFirst({
     where: { userId: parseInt(userId) },
     orderBy: { conversationId: 'desc' },
-});
+    });
 
-const nextConversationId = highestConversation ? highestConversation.conversationId + 1 : 1;
+    const nextConversationId = highestConversation ? highestConversation.conversationId + 1 : 1;
 
-let conversation = await prisma.conversation.create({
-    data: {
-        userId: parseInt(userId),
-        conversationId: nextConversationId,
-    },
-});
+    let conversation = await prisma.conversation.create({
+        data: {
+            userId: parseInt(userId),
+            conversationId: nextConversationId,
+        },
+    });
 
-console.log(`New conversation created: ${JSON.stringify(conversation)}`);
-return conversation;
+    console.log(`New conversation created: ${JSON.stringify(conversation)}`);
+    return conversation;
 };
 
 
 const getConversations = async (userId) => {
+    console.log(`Getting conversations for userId: ${userId}`);
     return await prisma.conversation.findMany({
-        where: { userId: parseInt(userId) }, // Ensure userId is being used correctly here
-        orderBy: { createdAt: "desc" },
+        where: { userId: parseInt(userId) },
+        orderBy: { createdAt: 'desc' },
     });
 };
 
