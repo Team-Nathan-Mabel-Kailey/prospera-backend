@@ -123,6 +123,10 @@ const openai = new OpenAI({
 const getChatHistoryById = async (req, res) => {
     const { userId, conversationId } = req.params;
 
+    if (!userId || !conversationId) {
+        return res.status(400).json({ error: "userId and conversationId are required" });
+    }
+
     try {
         const messages = await getChatHistory(userId, conversationId);
         res.json({ messages });
