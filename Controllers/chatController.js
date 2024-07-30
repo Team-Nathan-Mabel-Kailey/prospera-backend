@@ -222,7 +222,7 @@ const startNewConversation = async (req, res) => {
         res.json({ conversationId: conversation.conversationId });
     } catch (error) {
         console.error('Error starting new conversation:', error);
-        res.status(500).json({ error: "Failed to start new conversation" });
+        res.status(500).json({ error: "Failed to start new conversation", details: error.message });
     }
 };
 
