@@ -15,23 +15,33 @@ const getChatHistory = async (conversationId) => {
 };
 
 const saveChatMessage = async (conversationId, prompt, response, userId) => {
-    const chatMessage = await prisma.chatbotInteraction.create({
-        data: {
-            conversationId: parseInt(conversationId),
-            prompt,
-            response,
-            userId: userId,
-        },
-    });
-    console.log(`Chat message saved: ${JSON.stringify(chatMessage)}`);
+    try {
+        const chatMessage = await prisma.chatbotInteraction.create({
+            data: {
+                conversationId: parseInt(conversationId),
+                prompt,
+                response,
+                userId: parseInt(userId),
+            },
+        });
+        console.log(`Chat message saved: ${JSON.stringify(chatMessage)}`);
+        return chatMessage;
+    } catch (error) {
+        console.error('Error saving chat message:', error);
+        throw error;
+    }
 };
 
 const findOrCreateConversation = async (userId) => {
+    if (!userId) {
+        throw new Error("User ID is required to find or create a conversation");
+    }
+
     console.log("Creating conversation for user:", userId);
 
     // Check if the user exists
     const user = await prisma.user.findUnique({
-        where: { userID: userId },
+        where: { userID: parseInt(userId) },
     });
 
     if (!user) {
@@ -42,7 +52,7 @@ const findOrCreateConversation = async (userId) => {
     let conversation = await prisma.conversation.create({
         data: {
             user: {
-                connect: { userID: userId },
+                connect: { userID: parseInt(userId) },
             },
         },
     });
@@ -54,7 +64,7 @@ const findOrCreateConversation = async (userId) => {
 const getConversations = async (userId) => {
     return await prisma.conversation.findMany({
         where: { userId: parseInt(userId) }, // Ensure userId is being used correctly here
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
     });
 };
 
