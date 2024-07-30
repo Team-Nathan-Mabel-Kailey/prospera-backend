@@ -87,9 +87,18 @@ const createNewConversation = async (userId) => {
         throw new Error(`User with ID ${userId} not found`);
     }
 
+    // Find the highest conversationId for this user
+    const highestConversation = await prisma.conversation.findFirst({
+        where: { userId: parseInt(userId) },
+        orderBy: { conversationId: 'desc' },
+    });
+
+    const nextConversationId = highestConversation ? highestConversation.conversationId + 1 : 1;
+
     const conversation = await prisma.conversation.create({
         data: {
             userId: parseInt(userId),
+            conversationId: nextConversationId,
         },
     });
 
