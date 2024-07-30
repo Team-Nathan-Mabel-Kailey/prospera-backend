@@ -133,11 +133,10 @@ const getChatHistoryById = async (req, res) => {
 };
 
 const chatHandler = async (req, res) => {
-    const { prompt, conversationId } = req.body;
-    const userId = req.user; // Replace this with your logic for getting the user ID
+    const { prompt, conversationId, userId } = req.body;
 
-    if (!prompt) {
-        return res.status(400).send("Prompt is empty - it is required");
+    if (!prompt || !userId) {
+        return res.status(400).json({ error: "Prompt and userId are required" });
     }
 
     try {
@@ -191,6 +190,7 @@ const chatHandler = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
+        console.log('error is:',)
         res.status(500).send("Something went wrong");
     }
 };
