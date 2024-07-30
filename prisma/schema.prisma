@@ -37,20 +37,23 @@ model User {
 model ChatbotInteraction {
   id             Int          @id @default(autoincrement())
   conversationId Int
-  conversation   Conversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [userId, conversationId], references: [userId, conversationId], onDelete: Cascade)
   prompt         String
   response       String
   userId         Int
   user           User         @relation(fields: [userId], references: [userID], onDelete: Cascade)
   createdAt      DateTime     @default(now())
+  @@index([userId, conversationId])
 }
 
 model Conversation {
-  conversationId      Int                  @id @default(autoincrement())
+  conversationId      Int               
   userId              Int
   user                User                 @relation(fields: [userId], references: [userID], onDelete: Cascade)
   ChatbotInteractions ChatbotInteraction[]
   createdAt           DateTime             @default(now())
+  @@id([userId, conversationId])
+  @@unique([userId, conversationId])
 }
 
 model Widget {

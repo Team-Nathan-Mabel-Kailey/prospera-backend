@@ -7,10 +7,13 @@ const prisma = new PrismaClient({
     },
 });
 
-const getChatHistory = async (conversationId) => {
+const getChatHistory = async (userId, conversationId) => {
     return await prisma.chatbotInteraction.findMany({
-        where: { conversationId: parseInt(conversationId) },
-        orderBy: { createdAt: "asc" },
+        where: { 
+            userId: parseInt(userId),
+            conversationId: parseInt(conversationId) 
+        },
+        orderBy: { createdAt: 'asc' },
     });
 };
 
@@ -18,10 +21,10 @@ const saveChatMessage = async (conversationId, prompt, response, userId) => {
     try {
         const chatMessage = await prisma.chatbotInteraction.create({
             data: {
+                userId: parseInt(userId),
                 conversationId: parseInt(conversationId),
                 prompt,
                 response,
-                userId: parseInt(userId),
             },
         });
         console.log(`Chat message saved: ${JSON.stringify(chatMessage)}`);
@@ -48,16 +51,23 @@ const findOrCreateConversation = async (userId) => {
         throw new Error(`User with ID ${userId} not found`);
     }
 
-    // Create the conversation if the user exists
-    let conversation = await prisma.conversation.create({
-        data: {
-            user: {
-                connect: { userID: parseInt(userId) },
-            },
-        },
-    });
+   // Find the highest conversationId for this user
+    const highestConversation = await prisma.conversation.findFirst({
+    where: { userId: parseInt(userId) },
+    orderBy: { conversationId: 'desc' },
+});
 
-    return conversation;
+const nextConversationId = highestConversation ? highestConversation.conversationId + 1 : 1;
+
+let conversation = await prisma.conversation.create({
+    data: {
+        userId: parseInt(userId),
+        conversationId: nextConversationId,
+    },
+});
+
+console.log(`New conversation created: ${JSON.stringify(conversation)}`);
+return conversation;
 };
 
 

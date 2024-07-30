@@ -121,10 +121,10 @@ const openai = new OpenAI({
 });
 
 const getChatHistoryById = async (req, res) => {
-    const { conversationId } = req.params;
+    const { userId, conversationId } = req.params;
 
     try {
-        const messages = await getChatHistory(conversationId);
+        const messages = await getChatHistory(userId, conversationId);
         res.json({ messages });
     } catch (error) {
         console.error('Error fetching chat history:', error);
@@ -145,7 +145,7 @@ const chatHandler = async (req, res) => {
         ];
 
         if (conversationId) {
-            const previousMessages = await getChatHistory(conversationId);
+            const previousMessages = await getChatHistory(userId, conversationId);
             previousMessages.forEach((msg) => {
                 messages.push({ role: "user", content: msg.prompt });
                 messages.push({ role: "assistant", content: msg.response });
@@ -172,15 +172,13 @@ const chatHandler = async (req, res) => {
             }
         }
 
-        let newConversationId;
+        let newConversationId = conversationId;
         if (!conversationId) {
             const conversation = await findOrCreateConversation(userId);
             newConversationId = conversation.conversationId;
-        } else {
-            newConversationId = conversationId;
         }
 
-        await saveChatMessage(newConversationId, prompt, chatResponse, userId);
+        await saveChatMessage(userId, newConversationId, prompt, chatResponse);
         console.log(`Saved chat message to conversation ${newConversationId}: User: ${prompt}, Assistant: ${chatResponse}`);
 
         res.json({
