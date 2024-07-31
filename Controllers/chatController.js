@@ -124,7 +124,6 @@ const getChatHistoryById = async (req, res) => {
     const { userId, conversationId } = req.params;
     console.log("userId is:, ", userId);
     console.log("conversationId is:, ", conversationId);
-    
 
     if (!userId || !conversationId) {
         return res.status(400).json({ error: "userId and conversationId are required" });
