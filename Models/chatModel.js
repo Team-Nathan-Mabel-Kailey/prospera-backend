@@ -18,8 +18,7 @@ const getChatHistory = async (userId, conversationId) => {
     });
 };
 
-const saveChatMessage = async (userId, conversationId, prompt, response) => {
-    console.log(`Saving chat message for userId: ${userId}, conversationId: ${conversationId}`);
+const saveChatMessage = async (conversationId, prompt, response, userId) => {
     try {
         const chatMessage = await prisma.chatbotInteraction.create({
             data: {
@@ -27,14 +26,6 @@ const saveChatMessage = async (userId, conversationId, prompt, response) => {
                 conversationId: parseInt(conversationId),
                 prompt,
                 response,
-                conversation: {
-                    connect: {
-                        userId_conversationId: {
-                            userId: parseInt(userId),
-                            conversationId: parseInt(conversationId)
-                        }
-                    }
-                }
             },
         });
         console.log(`Chat message saved: ${JSON.stringify(chatMessage)}`);
