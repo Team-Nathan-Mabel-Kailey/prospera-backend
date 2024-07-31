@@ -33,29 +33,31 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/widgets', widgetRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/novu', novuRoutes);
+router.use(serve({ workflows: [hourlyHeadlinesWorkflow] }));
 
 // Schedule a cron job to trigger the workflow every hour
 cron.schedule('0 * * * *', async () => {
     try {
-        await novu.trigger('hourly-headlines', {
-            to: 'all', // Send to all users
-            payload: {},
-        });
+        const subscribers = await getAllSubscribers(); // Implement this function to get all subscriber IDs
+        for (const subscriber of subscribers) {
+            await novu.trigger('hourly-headlines', {
+                to: {
+                    subscriberId: subscriber.id,
+                },
+                payload: {},
+            });
+        }
     } catch (error) {
         console.error('Error triggering workflow:', error);
     }
 });
 
 // Endpoint to identify or create a subscriber
-app.get('/api/getSubscriber', async (req, res) => {
-    const user = req.user; // Assume user data is attached to req object after authentication
-
-    if (!user) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
+app.get('/api/getSubscriber', authMiddleware, async (req, res) => {
+    const user = req.user;
 
     try {
-        await novu.subscribers.identify(user.id, {
+        const subscriber = await novu.subscribers.identify(user.id, {
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
@@ -65,12 +67,35 @@ app.get('/api/getSubscriber', async (req, res) => {
             data: { customKey1: 'customVal1', customKey2: 'customVal2' },
         });
 
-        res.json({ subscriberId: user.id });
+        res.json({ subscriberId: subscriber.id });
     } catch (error) {
         console.error('Error identifying/creating subscriber:', error);
         res.status(500).json({ error: 'Failed to identify or create subscriber' });
     }
 });
+
+async function triggerNotificationForAllUsers(workflowId, payload) {
+    try {
+        // Fetch all subscribers
+        const { data: subscribers } = await novu.subscribers.list();
+
+        // Trigger the notification for each subscriber
+        const triggerPromises = subscribers.map(subscriber => 
+        novu.trigger(workflowId, {
+            to: {
+            subscriberId: subscriber.subscriberId,
+            },
+            payload: payload,
+        })
+        );
+
+        await Promise.all(triggerPromises);
+
+        console.log(`Notification triggered for ${subscribers.length} users`);
+    } catch (error) {
+        console.error('Error triggering notifications:', error);
+    }
+}
 
 
 app.listen(PORT, () => {
