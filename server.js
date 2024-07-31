@@ -12,6 +12,7 @@ const cron = require('node-cron');
 const { Novu } = require('@novu/node');
 const novu = new Novu(process.env.NOVU_SECRET_KEY);
 const { Pool } = require('pg');
+const authMiddleware = require('./Middleware/authMiddleware');
 
 require('dotenv').config(); // Load environment variables
 
@@ -33,7 +34,6 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/widgets', widgetRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/novu', novuRoutes);
-router.use(serve({ workflows: [hourlyHeadlinesWorkflow] }));
 
 // Schedule a cron job to trigger the workflow every hour
 cron.schedule('0 * * * *', async () => {
@@ -73,30 +73,6 @@ app.get('/api/getSubscriber', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Failed to identify or create subscriber' });
     }
 });
-
-async function triggerNotificationForAllUsers(workflowId, payload) {
-    try {
-        // Fetch all subscribers
-        const { data: subscribers } = await novu.subscribers.list();
-
-        // Trigger the notification for each subscriber
-        const triggerPromises = subscribers.map(subscriber => 
-        novu.trigger(workflowId, {
-            to: {
-            subscriberId: subscriber.subscriberId,
-            },
-            payload: payload,
-        })
-        );
-
-        await Promise.all(triggerPromises);
-
-        console.log(`Notification triggered for ${subscribers.length} users`);
-    } catch (error) {
-        console.error('Error triggering notifications:', error);
-    }
-}
-
 
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);
