@@ -7,41 +7,40 @@ const router = express.Router();
 router.use(express.json()); // Required for Novu POST requests
 router.use(serve({ workflows: [hourlyHeadlinesWorkflow] }));
 
-router.post('/trigger-workflow', async (req, res) => {
-    const { workflowId, subscriberId, payload } = req.body;
-
-    if (!workflowId || !subscriberId) {
-        return res.status(400).json({ error: 'Workflow ID and subscriber ID are required' });
-    }
-
+async function triggerNotificationForAllUsers(workflowId, payload) {
     try {
-        await novu.trigger(workflowId, {
-            to: {
-                subscriberId: subscriberId,
-            },
-            payload: payload || {},
-        });
+        const { data: subscribers } = await novu.subscribers.list();
+        
+        const triggerPromises = subscribers.map(subscriber => 
+            novu.trigger(workflowId, {
+                to: {
+                    subscriberId: subscriber.subscriberId,
+                },
+                payload: payload,
+            })
+        );
 
-        res.status(200).json({ message: 'Workflow triggered successfully' });
+        await Promise.all(triggerPromises);
+        console.log(`Notification triggered for ${subscribers.length} users`);
     } catch (error) {
-        console.error('Error triggering workflow:', error);
-        res.status(500).json({ error: 'Failed to trigger workflow' });
+        console.error('Error triggering notifications:', error);
+        throw error;
     }
-});
+}
 
-router.post('/trigger-all', async (req, res) => {
+router.post('/trigger-workflow-all', async (req, res) => {
     const { workflowId, payload } = req.body;
 
     if (!workflowId) {
-    return res.status(400).json({ error: 'Workflow ID is required' });
+        return res.status(400).json({ error: 'Workflow ID is required' });
     }
 
     try {
-    await triggerNotificationForAllUsers(workflowId, payload);
-    res.status(200).json({ message: 'Notifications triggered for all users' });
+        await triggerNotificationForAllUsers(workflowId, payload);
+        res.status(200).json({ message: 'Workflow triggered for all users successfully' });
     } catch (error) {
-    console.error('Error triggering notifications:', error);
-    res.status(500).json({ error: 'Failed to trigger notifications' });
+        console.error('Error triggering workflow for all users:', error);
+        res.status(500).json({ error: 'Failed to trigger workflow for all users' });
     }
 });
 
