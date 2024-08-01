@@ -39,12 +39,17 @@ const register = async (req, res) => {
         const user = await createUser(username, email, hashedPassword, hashedSecurityAnswer);
 
         // Create a Novu subscriber for the new user
-        await novu.subscribers.identify(user.userID.toString(), {
-            email: user.email,
-            firstName: user.username, // Adjusted as `firstName` is not in the user model
-            avatar: null, // Assuming avatar is not part of the user model
+        const novuSubscriber = await novu.subscribers.identify(user.userID.toString(), {
+            email: email,
+            firstName: username,
+            avatar: null,
         });
-
+        console.log("Novu subscriber created:", novuSubscriber);
+        
+        res.status(201).json({
+            user,
+            novuSubscriberId: user.userID.toString() // This is the Novu subscriber ID
+        });("Novu subscriber created:", novuSubscriber);
         console.log("User created:", user);
 
         res.status(201).json(user);
@@ -68,7 +73,8 @@ const login = async (req, res) => {
             res.status(200).json({ 
                 token, 
                 userId: user.userID, 
-                hasCompletedTopics: user.hasCompletedTopics 
+                hasCompletedTopics: user.hasCompletedTopics, 
+                novuSubscriberId: user.userID.toString()
             });
         } else {
             res.status(401).json({ error: "Invalid Credentials" });
