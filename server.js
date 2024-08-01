@@ -40,7 +40,7 @@ cron.schedule('0 * * * *', async () => {
     try {
         const { data: subscribers } = await novu.subscribers.list();
         for (const subscriber of subscribers) {
-            await novu.trigger('your-trigger-identifier', {
+            await novu.trigger('hourly-headlines', {
                 to: {
                     subscriberId: subscriber.subscriberId,
                 },
