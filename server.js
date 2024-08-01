@@ -24,9 +24,9 @@ const pool = new Pool({
 });
 
 // Middleware
-app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(cors(corsOptions));
 
 // Routes
 app.use('/users', userRoutes);
