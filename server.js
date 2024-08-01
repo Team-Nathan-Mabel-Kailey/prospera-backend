@@ -38,11 +38,11 @@ app.use('/api/novu', novuRoutes);
 // Schedule a cron job to trigger the workflow every hour
 cron.schedule('0 * * * *', async () => {
     try {
-        const subscribers = await getAllSubscribers(); // Implement this function to get all subscriber IDs
+        const { data: subscribers } = await novu.subscribers.list();
         for (const subscriber of subscribers) {
-            await novu.trigger('hourly-headlines', {
+            await novu.trigger('your-trigger-identifier', {
                 to: {
-                    subscriberId: subscriber.id,
+                    subscriberId: subscriber.subscriberId,
                 },
                 payload: {},
             });
