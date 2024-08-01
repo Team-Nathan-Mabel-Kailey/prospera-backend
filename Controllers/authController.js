@@ -40,8 +40,8 @@ const register = async (req, res) => {
 
         // Create a Novu subscriber for the new user
         const novuSubscriber = await novu.subscribers.identify(user.userID.toString(), {
-            email: email,
-            firstName: username,
+            email: user.email,
+            firstName: user.username,
             avatar: null,
         });
         console.log("Novu subscriber created:", novuSubscriber);
