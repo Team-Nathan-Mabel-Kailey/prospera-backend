@@ -19,11 +19,10 @@ async function triggerNotificationForAllUsers(workflowId, payload) {
             console.log('triggering workflow ', workflowId)
             return novu.trigger(workflowId, {
                 to: {
-                    subscriberId: subscriber._id,
+                    subscriberId: subscriber.subscriberId,
                     email: subscriber.email
                 },
                 payload: payload || {},
-                bridgeUrl: "https://c746caba-0b2b-4654-9288-ef324d4558c4.novu.sh/api/novu"
             })
             }
         );
