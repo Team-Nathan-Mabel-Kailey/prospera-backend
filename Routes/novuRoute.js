@@ -1,23 +1,31 @@
 const express = require('express');
 const { serve } = require('@novu/framework/express');
 const { hourlyHeadlinesWorkflow } = require('../novu/workflows');
+const novu = require('../novu');
 
 const router = express.Router();
 
 router.use(express.json()); // Required for Novu POST requests
-router.use(serve({ workflows: [hourlyHeadlinesWorkflow] }));
+
 
 async function triggerNotificationForAllUsers(workflowId, payload) {
     try {
-        const { data: subscribers } = await novu.subscribers.list();
-        
-        const triggerPromises = subscribers.map(subscriber => 
-            novu.trigger(workflowId, {
+        console.log('hello');
+        const data = await novu.subscribers.list();
+        const subscribers = data.data.data;
+        console.log(data)
+        const triggerPromises = subscribers.map(subscriber => {
+            console.log('subscriber is:', subscriber);
+            console.log('triggering workflow ', workflowId)
+            return novu.trigger(workflowId, {
                 to: {
-                    subscriberId: subscriber.subscriberId,
+                    subscriberId: subscriber._id,
+                    email: subscriber.email
                 },
                 payload: payload,
+                bridgeUrl: "https://c746caba-0b2b-4654-9288-ef324d4558c4.novu.sh/api/novu"
             })
+            }
         );
 
         await Promise.all(triggerPromises);
@@ -29,7 +37,9 @@ async function triggerNotificationForAllUsers(workflowId, payload) {
 }
 
 router.post('/trigger-workflow-all', async (req, res) => {
+
     const { workflowId, payload } = req.body;
+    console.log('request is:', req.body);
 
     if (!workflowId) {
         return res.status(400).json({ error: 'Workflow ID is required' });
@@ -43,5 +53,7 @@ router.post('/trigger-workflow-all', async (req, res) => {
         res.status(500).json({ error: 'Failed to trigger workflow for all users' });
     }
 });
+
+router.use('', serve({ workflows: [hourlyHeadlinesWorkflow] }));
 
 module.exports = router;
