@@ -38,21 +38,22 @@ const register = async (req, res) => {
         const hashedSecurityAnswer = await bcrypt.hash(securityAnswer, 10);
         const user = await createUser(username, email, hashedPassword, hashedSecurityAnswer);
 
-        // Create a Novu subscriber for the new user
-        const novuSubscriber = await novu.subscribers.identify(user.userID.toString(), {
-            email: user.email,
-            firstName: user.username,
-            avatar: null,
-        });
-        console.log("Novu subscriber created:", novuSubscriber);
-        
-        res.status(201).json({
-            user,
-            novuSubscriberId: user.userID.toString() // This is the Novu subscriber ID
-        });("Novu subscriber created:", novuSubscriber);
         console.log("User created:", user);
 
-        res.status(201).json(user);
+        // Create a Novu subscriber for the new user
+        try {
+            const novuSubscriber = await novu.subscribers.identify(user.userID.toString(), {
+                email: user.email,
+                firstName: user.username,
+                avatar: null,
+            });
+            console.log("Novu subscriber created:", novuSubscriber);
+        } catch (novuError) {
+            console.error("Error creating Novu subscriber:", novuError);
+            // Don't return here, continue with the registration process
+        }
+
+        return res.status(201).json(user);
     } catch (error) {
         console.error("User register error:", error);
         res.status(500).json({ error: "User register error" });
