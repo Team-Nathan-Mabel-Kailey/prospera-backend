@@ -53,7 +53,7 @@ const register = async (req, res) => {
             // Don't return here, continue with the registration process
         }
 
-        res.status(201).json(user);
+        return res.status(201).json(user);
     } catch (error) {
         console.error("User register error:", error);
         res.status(500).json({ error: "User register error" });
