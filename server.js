@@ -38,17 +38,29 @@ app.use('/api/novu', novuRoutes);
 // Schedule a cron job to trigger the workflow every hour
 cron.schedule('0 * * * *', async () => {
     try {
-        const { data: subscribers } = await novu.subscribers.list();
+        const { data } = await novu.subscribers.list();
+        const subscribers = data.data;
+
+        if (!Array.isArray(subscribers)) {
+            console.error('Subscribers is not an array:', subscribers);
+            return;
+        }
+
         for (const subscriber of subscribers) {
-            await novu.trigger('hourly-headlines', {
-                to: {
-                    subscriberId: subscriber.subscriberId,
-                },
-                payload: {},
-            });
+            try {
+                await novu.trigger('your-trigger-identifier', {
+                    to: {
+                        subscriberId: subscriber.subscriberId,
+                    },
+                    payload: {},
+                });
+                console.log(`Triggered workflow for subscriber: ${subscriber.subscriberId}`);
+            } catch (error) {
+                console.error(`Error triggering workflow for subscriber ${subscriber.subscriberId}:`, error);
+            }
         }
     } catch (error) {
-        console.error('Error triggering workflow:', error);
+        console.error('Error fetching subscribers or triggering workflow:', error);
     }
 });
 

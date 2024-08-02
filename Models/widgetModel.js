@@ -95,10 +95,25 @@ const deleteWidget = async (id) => {
         where: { id: parseInt(id) }
     });
 };
+
+const getFinancialGoalsByUserId = async (userId) => {
+    return await prisma.widget.findMany({
+        where: {
+            userId: parseInt(userId),
+            type: 'Financial Goals'
+        },
+        select: {
+            id: true,
+            configuration: true
+        }
+    });
+};
+
 module.exports = {
     getWidgetsByUserId,
     // createWidget,
     // updateWidgetLayout,
     updateWidgetContent,
-    deleteWidget
+    deleteWidget,
+    getFinancialGoalsByUserId
 };
