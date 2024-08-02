@@ -112,7 +112,7 @@
 // };
 
 // widgetcontroller
-const { getWidgetsByUserId, updateWidgetContent, deleteWidget } = require('../Models/widgetModel');
+const { getWidgetsByUserId, updateWidgetContent, deleteWidget, getFinancialGoalsByUserId } = require('../Models/widgetModel');
 const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -251,11 +251,24 @@ const getStockDataHandler = async (req, res) => {
         res.status(500).json({ error: 'Error fetching stock data' });
     }
 };
+
+const getFinancialGoalsByUserIdHandler = async (req, res) => {
+  const { userId } = req.params;
+  try {
+      const financialGoals = await getFinancialGoalsByUserId(userId);
+      res.status(200).json(financialGoals);
+  } catch (error) {
+      console.error('Error retrieving financial goals:', error);
+      res.status(500).json({ error: 'Error retrieving financial goals' });
+  }
+};
+
 module.exports = {
     getWidgetsByUserId: getWidgetsByUserIdHandler,
     updateWidgetContent: updateWidgetContentHandler,
     deleteWidget: deleteWidgetHandler,
     getStockData: getStockDataHandler,
     addWidget,
-    updateWidgetLayout
+    updateWidgetLayout,
+    getFinancialGoalsByUserId: getFinancialGoalsByUserIdHandler
 };
