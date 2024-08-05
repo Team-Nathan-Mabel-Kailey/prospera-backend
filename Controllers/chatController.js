@@ -1,5 +1,7 @@
 const { getChatHistory, saveChatMessage, findOrCreateConversation, getConversations, createNewConversation } = require("../Models/chatModel");
 const OpenAI = require("openai");
+const { getUserById } = require("../Models/authModel");
+const { getWidgetsByUserId, getFinancialGoalsByUserId } = require("../Models/widgetModel");
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -70,7 +72,7 @@ const chatHandler = async (req, res) => {
                 User's Financial Goals:
                 ${goalsInfo}
                 
-                Tailor your responses to this user's profile when appropriate.` },
+                Tailor your responses to this user's profile.` },
         ];
 
         if (conversationId) {
