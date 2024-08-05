@@ -13,6 +13,8 @@ const { Novu } = require('@novu/node');
 const novu = new Novu(process.env.NOVU_SECRET_KEY);
 const { Pool } = require('pg');
 const authMiddleware = require('./Middleware/authMiddleware');
+import { serve } from "@novu/framework/express";
+import { hourlyHeadlinesWorkflow } from './novu/workflows';
 
 require('dotenv').config(); // Load environment variables
 
@@ -27,6 +29,7 @@ const pool = new Pool({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
+app.use( "/api/novu", serve({ workflows: [hourly-headlines] }) );
 
 // Routes
 app.use('/users', userRoutes);
@@ -48,7 +51,7 @@ cron.schedule('0 * * * *', async () => {
 
         for (const subscriber of subscribers) {
             try {
-                await novu.trigger('your-trigger-identifier', {
+                await novu.trigger('hourly-headlines', {
                     to: {
                         subscriberId: subscriber.subscriberId,
                     },
