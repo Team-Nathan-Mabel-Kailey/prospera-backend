@@ -50,6 +50,7 @@ const getUserById = async (userId) => {
             Conversations: true,
             ChatbotInteractions: true,
             Widgets: true,
+            topics: true,
         }
     });
 };
