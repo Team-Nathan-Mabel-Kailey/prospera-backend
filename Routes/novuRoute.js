@@ -16,8 +16,8 @@ async function getAllSubscribers() {
     while (hasMore) {
         try {
             const response = await novu.subscribers.list({
-                page,
-                limit
+                page: page,
+                limit: limit
             });
             
             if (response.data && Array.isArray(response.data.data)) {
@@ -42,6 +42,11 @@ async function triggerNotificationForAllUsers(workflowId, payload) {
         console.log('Fetching all subscribers...');
         const subscribers = await getAllSubscribers();
         console.log(`Total subscribers: ${subscribers.length}`);
+
+        if (subscribers.length === 0) {
+            console.log('No subscribers found. Skipping workflow trigger.');
+            return;
+        }
 
         for (const subscriber of subscribers) {
             try {
@@ -74,10 +79,12 @@ router.post('/trigger-workflow-all', async (req, res) => {
     }
 
     try {
+        console.log(`Attempting to trigger workflow: ${workflowId}`);
         await triggerNotificationForAllUsers(workflowId, payload);
+        console.log(`Workflow ${workflowId} triggered successfully`);
         res.status(200).json({ message: 'Workflow triggered for all users successfully' });
     } catch (error) {
-        console.error('Error triggering workflow for all users:', error);
+        console.error('Error triggering workflow for all users:', error.response?.data || error.message);
         res.status(500).json({ error: 'Failed to trigger workflow for all users', details: error.message });
     }
 });
