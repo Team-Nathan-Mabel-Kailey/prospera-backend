@@ -29,7 +29,7 @@ const pool = new Pool({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
-app.use( "/api/novu", serve({ workflows: [hourly-headlines] }) );
+app.use( "/api/novu", serve({ workflows: [hourlyHeadlinesWorkflow] }) );
 
 // Routes
 app.use('/users', userRoutes);
