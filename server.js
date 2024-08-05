@@ -13,8 +13,8 @@ const { Novu } = require('@novu/node');
 const novu = new Novu(process.env.NOVU_SECRET_KEY);
 const { Pool } = require('pg');
 const authMiddleware = require('./Middleware/authMiddleware');
-import { serve } from "@novu/framework/express";
-import { hourlyHeadlinesWorkflow } from './novu/workflows';
+const { serve } = require("@novu/framework/express");
+const { hourlyHeadlinesWorkflow } = require('./novu/workflows');
 
 require('dotenv').config(); // Load environment variables
 
