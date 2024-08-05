@@ -26,7 +26,8 @@ const {
     updateWidgetContent,
     deleteWidget,
     getStockData,
-    getFinancialGoalsByUserId
+    getFinancialGoalsByUserId,
+    checkGoalExists
 } = require('../Controllers/widgetController');
 
 const router = express.Router();
@@ -37,5 +38,6 @@ router.put('/content/:id', updateWidgetContent);
 router.delete('/:id', deleteWidget);
 router.get('/stock', getStockData);
 router.get('/user/financial-goals/:userId', getFinancialGoalsByUserId);
+router.get('/user/goals/:goalId', checkGoalExists);
 
 module.exports = router;

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Widget" ADD COLUMN     "maxH" INTEGER,
+ADD COLUMN     "maxW" INTEGER,
+ADD COLUMN     "minH" INTEGER,
+ADD COLUMN     "minW" INTEGER;
