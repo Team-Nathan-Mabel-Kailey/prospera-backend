@@ -152,6 +152,7 @@ const getTopics = async (req, res) => {
 
 const getUser = async (req, res) => {
     const { userId } = req.params;
+    console.log('userid:', userId);
     try {
     const user = await getUserById(userId);
     if (!user) {
@@ -159,6 +160,7 @@ const getUser = async (req, res) => {
     }
     res.status(200).json(user);
     } catch (error) {
+    console.log('error is', error);
     res.status(500).json({ error: 'Failed to retrieve user' });
     }
 };
