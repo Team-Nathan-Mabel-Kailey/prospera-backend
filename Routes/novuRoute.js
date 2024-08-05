@@ -3,7 +3,7 @@ const { Novu } = require('@novu/node');
 const { hourlyHeadlinesWorkflow } = require('../novu/workflows');
 
 const router = express.Router();
-const novu = new Novu(process.env.NOVU_API_KEY);
+const novu = new Novu(process.env.NOVU_SECRET_KEY);
 
 router.use(express.json());
 
