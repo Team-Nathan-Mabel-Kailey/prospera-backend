@@ -16,7 +16,7 @@ const getWidgetsByUserIdHandler = async (req, res) => {
 };
 
 const addWidget = async (req, res) => {
-    const { userId, type, x, y, w, h, configuration, i } = req.body;
+    const { userId, type, x, y, w, h, configuration, i, minW, maxW, minH, maxH } = req.body;
     try {
       const newWidget = await prisma.widget.create({
         data: {
@@ -26,6 +26,10 @@ const addWidget = async (req, res) => {
           y,
           w,
           h,
+          minW,
+          maxW,
+          minH,
+          maxH,
           configuration,
           user: {
             connect: { userID: parseInt(userId) },
