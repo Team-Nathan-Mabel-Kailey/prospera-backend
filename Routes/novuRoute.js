@@ -14,10 +14,24 @@ async function getAllSubscribers() {
     let hasMore = true;
 
     while (hasMore) {
-        const response = await novu.subscribers.list({ page, limit });
-        allSubscribers = allSubscribers.concat(response.data);
-        hasMore = response.hasMore;
-        page++;
+        try {
+            const response = await novu.subscribers.list({
+                page,
+                limit
+            });
+            
+            if (response.data && Array.isArray(response.data.data)) {
+                allSubscribers = allSubscribers.concat(response.data.data);
+                hasMore = response.data.hasMore;
+                page++;
+            } else {
+                console.error('Unexpected response structure:', response);
+                hasMore = false;
+            }
+        } catch (error) {
+            console.error('Error fetching subscribers:', error.response?.data || error.message);
+            hasMore = false;
+        }
     }
 
     return allSubscribers;
@@ -29,21 +43,24 @@ async function triggerNotificationForAllUsers(workflowId, payload) {
         const subscribers = await getAllSubscribers();
         console.log(`Total subscribers: ${subscribers.length}`);
 
-        const triggerPromises = subscribers.map(subscriber => {
-            console.log(`Triggering workflow for subscriber: ${subscriber.subscriberId}`);
-            return novu.trigger(workflowId, {
-                to: {
-                    subscriberId: subscriber.subscriberId,
-                    email: subscriber.email
-                },
-                payload: payload || {}
-            });
-        });
+        for (const subscriber of subscribers) {
+            try {
+                await novu.trigger(workflowId, {
+                    to: {
+                        subscriberId: subscriber.subscriberId,
+                        email: subscriber.email
+                    },
+                    payload: payload || {}
+                });
+                console.log(`Triggered workflow for subscriber: ${subscriber.subscriberId}`);
+            } catch (error) {
+                console.error(`Error triggering workflow for subscriber ${subscriber.subscriberId}:`, error.response?.data || error.message);
+            }
+        }
 
-        await Promise.all(triggerPromises);
         console.log(`Notification triggered for ${subscribers.length} subscribers`);
     } catch (error) {
-        console.error('Error triggering notifications:', error);
+        console.error('Error triggering notifications:', error.response?.data || error.message);
         throw error;
     }
 }
