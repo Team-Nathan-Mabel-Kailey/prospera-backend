@@ -1,75 +1,61 @@
-const express = require('express');
-const { Novu } = require('@novu/node');
-require('dotenv').config();
+const express = require('express'); // Import express for routing
+require('dotenv').config(); // Load environment variables
+const { Novu } = require('@novu/node'); // Import Novu for notifications
 
-const router = express.Router();
-const novu = new Novu(process.env.NOVU_SECRET_KEY);
+const novu = new Novu(process.env.NOVU_SECRET_KEY); // Initialize Novu with secret key
+const router = express.Router(); // Create a new router
 
-const ENVIRONMENT_ID = process.env.ENVIRONMENT_ID;
-const APPLICATION_IDENTIFIER = process.env.APPLICATION_IDENTIFIER;
-
+// Function to get all subscribers from Novu
 async function getAllSubscribers() {
     try {
         console.log('Fetching all subscribers');
-        const response = await novu.subscribers.list({ environmentId: ENVIRONMENT_ID });
+        let page = 0;
+        const limit = 100;
+        let allSubscribers = [];
 
-        if (!response.data || !Array.isArray(response.data)) {
-            console.error('Unexpected response structure:', response);
-            return [];
-        }
+        const response = await novu.subscribers.list(page, limit);
 
-        console.log(`Total subscribers fetched: ${response.data.length}`);
-        return response.data;
+        allSubscribers = allSubscribers.concat(response);
+        console.log(`Fetched page ${page + 1} with ${response.data.length} subscribers`);
+
+        console.log(`Total subscribers fetched: ${allSubscribers.length}`);
+        return allSubscribers;
     } catch (error) {
-        console.error('Error fetching subscribers:', error.response?.data || error.message);
+        console.error('Error fetching subscribers:', error);
         return [];
     }
 }
 
+// Function to trigger notifications for all users
 async function triggerNotificationForAllUsers(workflowId, payload) {
     try {
         console.log(`Fetching all subscribers for workflow: ${workflowId}`);
         const subscribers = await getAllSubscribers();
         console.log(`Total subscribers: ${subscribers.length}`);
 
-        if (subscribers.length === 0) {
-            console.log('No subscribers found. Skipping workflow trigger.');
-            return;
-        }
+        const triggerPromises = subscribers.map(subscriber => 
+            novu.trigger(workflowId, {
+                to: {
+                    subscriberId: subscriber.subscriberId
+                },
+                payload: payload || {}
+            })
+        );
 
-        let successCount = 0;
-        let errorCount = 0;
+        const results = await Promise.all(triggerPromises);
 
-        for (const subscriber of subscribers) {
-            try {
-                await novu.trigger(workflowId, {
-                    to: {
-                        subscriberId: subscriber.subscriberId,
-                        email: subscriber.email
-                    },
-                    payload: payload || {},
-                    environmentId: ENVIRONMENT_ID,
-                    applicationIdentifier: APPLICATION_IDENTIFIER
-                });
-                console.log(`Triggered workflow for subscriber: ${subscriber.subscriberId}`);
-                successCount++;
-            } catch (error) {
-                console.error(`Error triggering workflow for subscriber ${subscriber.subscriberId}:`, error.response?.data || error.message);
-                errorCount++;
-            }
-        }
-
-        console.log(`Notification triggered successfully for ${successCount} subscribers`);
-        console.log(`Failed to trigger notification for ${errorCount} subscribers`);
+        console.log(`Triggered workflow for ${results.length} subscribers`);
+        return results;
     } catch (error) {
-        console.error('Error triggering notifications:', error.response?.data || error.message);
+        console.error('Error triggering notifications:', error);
         throw error;
     }
 }
 
+// Route to trigger workflow for all users
 router.post('/trigger-workflow-all', async (req, res) => {
+    console.log('Trigger all endpoint hit');
     const { workflowId, payload } = req.body;
-    console.log('Request received:', req.body);
 
     if (!workflowId) {
         return res.status(400).json({ error: 'Workflow ID is required' });
@@ -77,12 +63,19 @@ router.post('/trigger-workflow-all', async (req, res) => {
 
     try {
         console.log(`Attempting to trigger workflow: ${workflowId}`);
-        await triggerNotificationForAllUsers(workflowId, payload);
-        res.status(200).json({ message: 'Workflow triggered for all users successfully' });
+        const results = await triggerNotificationForAllUsers(workflowId, payload);
+        
+        res.status(200).json({ 
+            message: 'Workflow triggered for all users',
+            triggeredCount: results.length
+        });
     } catch (error) {
-        console.error('Error triggering workflow for all users:', error.response?.data || error.message);
-        res.status(500).json({ error: 'Failed to trigger workflow for all users', details: error.message });
+        console.error('Error triggering workflow for all users:', error);
+        res.status(500).json({ 
+            error: 'Failed to trigger workflow for all users', 
+            details: error.message 
+        });
     }
 });
 
-module.exports = router;
+module.exports = router; // Export the router

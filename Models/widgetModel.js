@@ -1,7 +1,6 @@
-//widget model
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+
 // Function to get widgets by user ID
 const getWidgetsByUserId = async (userId) => {
     return await prisma.widget.findMany({
@@ -23,6 +22,7 @@ const updateWidgetContent = async (id, configuration) => {
         }
     });
 };
+
 // Function to delete a widget by ID
 const deleteWidget = async (id) => {
     return await prisma.widget.delete({
@@ -30,6 +30,7 @@ const deleteWidget = async (id) => {
     });
 };
 
+// Function to get financial goals by user ID
 const getFinancialGoalsByUserId = async (userId) => {
     return await prisma.widget.findMany({
         where: {
@@ -45,8 +46,6 @@ const getFinancialGoalsByUserId = async (userId) => {
 
 module.exports = {
     getWidgetsByUserId,
-    // createWidget,
-    // updateWidgetLayout,
     updateWidgetContent,
     deleteWidget,
     getFinancialGoalsByUserId

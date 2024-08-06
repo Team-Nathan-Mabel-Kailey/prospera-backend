@@ -36,6 +36,7 @@ const updateUserPasswordByUsername = async (username, newPassword) => {
     });
 };
 
+// Function to update the user's topics
 const updateUserTopics = async (userId, topics) => {
     return await prisma.user.update({
         where: { userID: parseInt(userId) },  // Ensure userID is an integer
@@ -43,6 +44,7 @@ const updateUserTopics = async (userId, topics) => {
     });
 };
 
+// Function to get a user by user ID
 const getUserById = async (userId) => {
     console.log('userid is', userId);
     return await prisma.user.findUnique({
@@ -55,6 +57,7 @@ const getUserById = async (userId) => {
     });
 };
 
+// Function to get all users
 const getAllUsers = async () => {
     return await prisma.user.findMany({
     select: {
