@@ -29,14 +29,13 @@ const pool = new Pool({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
-app.use( "/api/novu", serve({ workflows: [hourlyHeadlinesWorkflow] }) );
 
 // Routes
-app.use('/users', userRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/widgets', widgetRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/novu', novuRoutes);
+app.use('/users', userRoutes); // Use user routes for /users endpoint
+app.use('/api/chat', chatRoutes); // Use chat routes for /api/chat endpoint
+app.use('/api/widgets', widgetRoutes); // Use widget routes for /api/widgets endpoint
+app.use('/api/settings', settingsRoutes); // Use settings routes for /api/settings endpoint
+app.use('/api/novu', novuRoutes); // Use novu routes for /api/novu endpoint
 
 // Schedule a cron job to trigger the workflow every hour
 cron.schedule('0 * * * *', async () => {
@@ -89,6 +88,10 @@ app.get('/api/getSubscriber', authMiddleware, async (req, res) => {
     }
 });
 
+// Serve Novu workflows
+app.use( "/api/novu", serve({ workflows: [hourlyHeadlinesWorkflow] }) );
+
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server is up and running on PORT: ${PORT}`);
 });

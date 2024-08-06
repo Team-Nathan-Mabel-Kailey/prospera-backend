@@ -3,20 +3,24 @@ const OpenAI = require("openai");
 const { getUserById } = require("../Models/authModel");
 const { getWidgetsByUserId, getFinancialGoalsByUserId } = require("../Models/widgetModel");
 
+// Initialize OpenAI API client
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Controller to get chat history for a specific user and conversation
 const getChatHistoryById = async (req, res) => {
     const { userId, conversationId } = req.params;
     console.log("userId is:, ", userId);
     console.log("conversationId is:, ", conversationId);
 
+    // Validate input
     if (!userId || !conversationId) {
         return res.status(400).json({ error: "userId and conversationId are required" });
     }
 
     try {
+        // Fetch and return chat history
         const messages = await getChatHistory(userId, conversationId);
         res.json({ messages });
     } catch (error) {
@@ -25,19 +29,23 @@ const getChatHistoryById = async (req, res) => {
     }
 };
 
+// Main chat handler for sending messages
 const chatHandler = async (req, res) => {
     const { prompt, conversationId, userId } = req.body;
 
+    // Validates input 
     if (!prompt || !userId) {
         return res.status(400).json({ error: "Prompt and userId are required" });
     }
 
     try {
+        // Gets user data (Utilizes helper function from chatModdel)
         const userData = await getUserById(userId);
         if (!userData) {
             return res.status(404).json({ error: "User not found" });
         }
 
+        // Gets user's widgets and financial goals
         const userWidgets = await getWidgetsByUserId(userId);
 
         // Fetch financial goals
@@ -59,6 +67,7 @@ const chatHandler = async (req, res) => {
             return `Goal ID: ${goal.id}\nDetails: ${JSON.stringify(goal.configuration)}\n`;
         }).join('\n');
 
+         // Prepare messages for OpenAI API
         let messages = [
             { 
                 role: "system", 
@@ -75,6 +84,7 @@ const chatHandler = async (req, res) => {
                 Tailor your responses to this user's profile.` },
         ];
 
+        // Add previous conversation messages if conversationId exists
         if (conversationId) {
             const previousMessages = await getChatHistory(userId, conversationId);
             previousMessages.forEach((msg) => {
@@ -83,6 +93,7 @@ const chatHandler = async (req, res) => {
             });
         }
 
+        // Add current user prompt
         messages.push({ role: "user", content: prompt });
 
         let chatResponse;
@@ -103,15 +114,18 @@ const chatHandler = async (req, res) => {
             }
         }
 
+        // Create new conversation if needed
         let newConversationId = conversationId;
         if (!conversationId) {
             const conversation = await findOrCreateConversation(userId);
             newConversationId = conversation.conversationId;
         }
 
+        // Save chat message
         await saveChatMessage(userId, newConversationId, prompt, chatResponse);
         console.log(`Saved chat message to conversation ${newConversationId}: User: ${prompt}, Assistant: ${chatResponse}`);
 
+        // Send response
         res.json({
             prompt: prompt,
             response: chatResponse,
@@ -124,6 +138,7 @@ const chatHandler = async (req, res) => {
     }
 };
 
+// Get all conversations for a user
 const getConversationsByUserId = async (req, res) => {
     const { userId } = req.params;
     console.log("userId in controller for getConversationsByUserId:", userId);
@@ -137,6 +152,8 @@ const getConversationsByUserId = async (req, res) => {
     }
 };
 
+// Start a new conversation for a user
+// This function is designed to always create a new conversation for a user, regardless of existing conversations
 const startNewConversation = async (req, res) => {
     const { userId } = req.body;
 

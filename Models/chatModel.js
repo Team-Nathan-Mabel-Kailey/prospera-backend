@@ -7,8 +7,8 @@ const prisma = new PrismaClient({
     },
 });
 
+// Function to get chat history for a specific user and conversation
 const getChatHistory = async (userId, conversationId) => {
-    console.log(`Getting chat history for userId: ${userId}, conversationId: ${conversationId}`);
     return await prisma.chatbotInteraction.findMany({
         where: { 
             userId: parseInt(userId),
@@ -18,6 +18,7 @@ const getChatHistory = async (userId, conversationId) => {
     });
 };
 
+// Function to save a chat message for a specific user and conversation
 const saveChatMessage = async (userId, conversationId, prompt, response) => {
     try {
         const chatMessage = await prisma.chatbotInteraction.create({
@@ -28,20 +29,18 @@ const saveChatMessage = async (userId, conversationId, prompt, response) => {
                 response,
             },
         });
-        console.log(`Chat message saved: ${JSON.stringify(chatMessage)}`);
         return chatMessage;
     } catch (error) {
-        console.error('Error saving chat message:', error);
         throw error;
     }
 };
 
+// Function to find or create a new conversation for a specific user
+// may imply that it will find an existing conversation if one exists and create a new one if not
 const findOrCreateConversation = async (userId) => {
     if (!userId) {
         throw new Error("User ID is required to find or create a conversation");
     }
-
-    console.log("Creating conversation for user:", userId);
 
     // Check if the user exists
     const user = await prisma.user.findUnique({
@@ -58,7 +57,7 @@ const findOrCreateConversation = async (userId) => {
     orderBy: { conversationId: 'desc' },
     });
 
-    const nextConversationId = highestConversation ? highestConversation.conversationId + 1 : 1;
+    const nextConversationId = highestConversation ? highestConversation.conversationId + 1 : 1; // Determine the next conversation ID
 
     let conversation = await prisma.conversation.create({
         data: {
@@ -67,19 +66,19 @@ const findOrCreateConversation = async (userId) => {
         },
     });
 
-    console.log(`New conversation created: ${JSON.stringify(conversation)}`);
     return conversation;
 };
 
-
+// Function to get all conversations for a specific user
 const getConversations = async (userId) => {
-    console.log(`Getting conversations for userId: ${userId}`);
     return await prisma.conversation.findMany({
         where: { userId: parseInt(userId) },
         orderBy: { createdAt: 'desc' },
     });
 };
 
+
+// Function to create a new conversation for a specific user
 const createNewConversation = async (userId) => {
     const user = await prisma.user.findUnique({
         where: { userID: parseInt(userId) },
@@ -104,7 +103,6 @@ const createNewConversation = async (userId) => {
         },
     });
 
-    console.log(`New conversation created: ${JSON.stringify(conversation)}`);
     return conversation;
 };
 
